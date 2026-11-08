@@ -96,7 +96,7 @@ sealed class DetectedShape {
 /**
  * Advanced Geometric Shape Recognition Engine for FlowNotes.
  * Detects Lines (with angle snapping to 0°, 30°, 45°, 60°, 90°, 180°),
- * Circles, Ellipses, Rectangles, Rounded Rectangles, and Triangles.
+ * Circles, Rectangles, Rounded Rectangles, Ellipses, and Triangles.
  */
 object ShapeRecognizer {
 
@@ -146,12 +146,12 @@ object ShapeRecognizer {
         if (straightness >= 0.91f && chordDist > 25f) {
             val maxPerpDist = computeMaxPerpendicularDistance(points, start, end)
             if (maxPerpDist <= max(12f, 0.08f * chordDist)) {
-                return snapLine(start, end, chordDist)
+                return snapLine(points, start, end, chordDist)
             }
         }
 
-        // 2. Check if Shape is Closed
-        val isClosed = (chordDist < diagonal * 0.22f) || (chordDist < arcLength * 0.18f)
+        // 2. Check if Shape is Closed (relative to bounding box diagonal, NOT arc length)
+        val isClosed = chordDist < diagonal * 0.20f
         if (!isClosed) return null
 
         // Radial Statistics around Centroid
@@ -177,32 +177,42 @@ object ShapeRecognizer {
             return DetectedShape.Circle(centroidX, centroidY, meanR.toFloat())
         }
 
-        // 4. Ellipse Check (PCA Covariance & Residual Error)
-        val ellipse = fitEllipse(points, centroidX, centroidY)
-        if (ellipse != null) {
-            return ellipse
-        }
-
-        // 5. Polygon Simplification (Ramer-Douglas-Peucker) for Triangles and Rectangles
+        // 4. Polygon Simplification (Ramer-Douglas-Peucker) for Triangles
         val simplified = simplifyClosedPolygon(points, centroidX, centroidY, diagonal)
         if (simplified.size == 3) {
             return classifyTriangle(simplified[0], simplified[1], simplified[2])
         }
 
-        // 6. Rectangle and Rounded Rectangle Check
+        // 5. Rectangle and Rounded Rectangle Check (Evaluated BEFORE Ellipse)
         val rectBounds = RectF(minX, minY, maxX, maxY)
-        val cornerOffset = computeAverageCornerOffset(points, rectBounds)
         val minDim = min(width, height)
+        val avgEdgeDist = computeAverageEdgeDistance(points, rectBounds)
 
-        if (cornerOffset in 8f..(minDim * 0.38f)) {
-            val cornerRadius = (cornerOffset * 2.414f).coerceIn(8f, minDim * 0.40f)
-            return DetectedShape.RoundedRectangle(rectBounds, cornerRadius)
+        if (avgEdgeDist <= max(6f, minDim * 0.05f)) {
+            val cornerOffsets = computeCornerOffsets(points, rectBounds)
+            val maxCornerDist = maxOf(cornerOffsets.tl, cornerOffsets.tr, cornerOffsets.br, cornerOffsets.bl)
+            if (maxCornerDist <= minDim * 0.45f) {
+                val avgCornerOffset = cornerOffsets.average
+                if (avgCornerOffset in 8f..(minDim * 0.38f)) {
+                    val cornerRadius = (avgCornerOffset * 2.414f).coerceIn(8f, minDim * 0.40f)
+                    return DetectedShape.RoundedRectangle(rectBounds, cornerRadius)
+                } else if (avgCornerOffset < 8f) {
+                    return DetectedShape.Rectangle(rectBounds)
+                }
+            }
         }
 
-        return DetectedShape.Rectangle(rectBounds)
+        // 6. Ellipse Check (PCA Covariance & Residual Error)
+        val ellipse = fitEllipse(points, centroidX, centroidY)
+        if (ellipse != null) {
+            return ellipse
+        }
+
+        // 7. Fallthrough Rejection: Never return Rectangle by default; reject unknown closed strokes
+        return null
     }
 
-    private fun snapLine(start: Point, end: Point, chordDist: Float): DetectedShape.Line {
+    private fun snapLine(points: List<Point>, start: Point, end: Point, chordDist: Float): DetectedShape.Line {
         val rawAngleRad = atan2(end.y - start.y, end.x - start.x)
         var rawAngleDeg = Math.toDegrees(rawAngleRad.toDouble()).toFloat()
         if (rawAngleDeg < 0f) rawAngleDeg += 360f
@@ -219,17 +229,65 @@ object ShapeRecognizer {
         }
 
         return if (minDiff <= ANGLE_SNAP_TOLERANCE_DEG) {
-            val snapRad = Math.toRadians(bestSnap.toDouble())
-            val snappedEndX = start.x + chordDist * cos(snapRad).toFloat()
-            val snappedEndY = start.y + chordDist * sin(snapRad).toFloat()
-            DetectedShape.Line(
-                startX = start.x,
-                startY = start.y,
-                endX = snappedEndX,
-                endY = snappedEndY,
-                snappedAngleDegrees = bestSnap,
-                isSnapped = true
-            )
+            when (bestSnap) {
+                0f -> {
+                    val baselineY = computeBaselineY(points, start)
+                    DetectedShape.Line(
+                        startX = start.x,
+                        startY = baselineY,
+                        endX = start.x + chordDist,
+                        endY = baselineY,
+                        snappedAngleDegrees = 0f,
+                        isSnapped = true
+                    )
+                }
+                180f -> {
+                    val baselineY = computeBaselineY(points, start)
+                    DetectedShape.Line(
+                        startX = start.x,
+                        startY = baselineY,
+                        endX = start.x - chordDist,
+                        endY = baselineY,
+                        snappedAngleDegrees = 180f,
+                        isSnapped = true
+                    )
+                }
+                90f -> {
+                    val baselineX = computeBaselineX(points, start)
+                    DetectedShape.Line(
+                        startX = baselineX,
+                        startY = start.y,
+                        endX = baselineX,
+                        endY = start.y + chordDist,
+                        snappedAngleDegrees = 90f,
+                        isSnapped = true
+                    )
+                }
+                270f -> {
+                    val baselineX = computeBaselineX(points, start)
+                    DetectedShape.Line(
+                        startX = baselineX,
+                        startY = start.y,
+                        endX = baselineX,
+                        endY = start.y - chordDist,
+                        snappedAngleDegrees = 270f,
+                        isSnapped = true
+                    )
+                }
+                else -> {
+                    val snapRad = Math.toRadians(bestSnap.toDouble())
+                    val snappedEndX = start.x + chordDist * cos(snapRad).toFloat()
+                    val snappedEndY = start.y + chordDist * sin(snapRad).toFloat()
+                    DetectedShape.Line(
+                        startX = start.x,
+                        startY = start.y,
+                        endX = snappedEndX,
+                        endY = snappedEndY,
+                        snappedAngleDegrees = bestSnap,
+                        isSnapped = true
+                    )
+                }
+            }
         } else {
             DetectedShape.Line(
                 startX = start.x,
@@ -240,6 +298,64 @@ object ShapeRecognizer {
                 isSnapped = false
             )
         }
+    }
+
+    private fun computeBaselineY(points: List<Point>, start: Point): Float {
+        val n = points.size
+        var sumX = 0.0
+        var sumY = 0.0
+        for (p in points) {
+            sumX += p.x
+            sumY += p.y
+        }
+        val meanX = sumX / n
+        val meanY = sumY / n
+        var num = 0.0
+        var den = 0.0
+        for (p in points) {
+            val dx = p.x - meanX
+            val dy = p.y - meanY
+            num += dx * dy
+            den += dx * dx
+        }
+        var base = start.y
+        if (den > 1e-4) {
+            val slope = num / den
+            base = (meanY + slope * (start.x - meanX)).toFloat()
+        }
+        if (abs(base - round(base)) <= 0.45f) {
+            base = round(base)
+        }
+        return base
+    }
+
+    private fun computeBaselineX(points: List<Point>, start: Point): Float {
+        val n = points.size
+        var sumX = 0.0
+        var sumY = 0.0
+        for (p in points) {
+            sumX += p.x
+            sumY += p.y
+        }
+        val meanX = sumX / n
+        val meanY = sumY / n
+        var num = 0.0
+        var den = 0.0
+        for (p in points) {
+            val dx = p.x - meanX
+            val dy = p.y - meanY
+            num += dx * dy
+            den += dy * dy
+        }
+        var base = start.x
+        if (den > 1e-4) {
+            val slope = num / den
+            base = (meanX + slope * (start.y - meanY)).toFloat()
+        }
+        if (abs(base - round(base)) <= 0.45f) {
+            base = round(base)
+        }
+        return base
     }
 
     private fun fitEllipse(points: List<Point>, cx: Float, cy: Float): DetectedShape.Ellipse? {
@@ -367,8 +483,13 @@ object ShapeRecognizer {
         val angleC = 180f - angleA - angleB
 
         val maxEquilateralDiff = maxOf(abs(angleA - 60f), abs(angleB - 60f), abs(angleC - 60f))
-        if (maxEquilateralDiff <= 12f) {
-            // Equilateral triangle
+        val maxSide = maxOf(a, b, c)
+        val minSide = minOf(a, b, c)
+        val sideRatioDiff = (maxSide - minSide) / maxSide.coerceAtLeast(1f)
+
+        // Tightened equilateral threshold: angle diff <= 5.0° and side ratio diff <= 0.08
+        if (maxEquilateralDiff <= 5.0f && sideRatioDiff <= 0.08f) {
+            // Equilateral triangle regularized to circumcircle
             val gx = (p1.x + p2.x + p3.x) / 3f
             val gy = (p1.y + p2.y + p3.y) / 3f
             val r = (hypot(p1.x - gx, p1.y - gy) + hypot(p2.x - gx, p2.y - gy) + hypot(p3.x - gx, p3.y - gy)) / 3f
@@ -388,7 +509,15 @@ object ShapeRecognizer {
         }
     }
 
-    private fun computeAverageCornerOffset(points: List<Point>, bounds: RectF): Float {
+    private data class CornerOffsets(
+        val tl: Float,
+        val tr: Float,
+        val br: Float,
+        val bl: Float,
+        val average: Float
+    )
+
+    private fun computeCornerOffsets(points: List<Point>, bounds: RectF): CornerOffsets {
         var minTL = Float.MAX_VALUE
         var minTR = Float.MAX_VALUE
         var minBR = Float.MAX_VALUE
@@ -400,7 +529,18 @@ object ShapeRecognizer {
             minBR = min(minBR, hypot(p.x - bounds.right, p.y - bounds.bottom))
             minBL = min(minBL, hypot(p.x - bounds.left, p.y - bounds.bottom))
         }
-        return (minTL + minTR + minBR + minBL) / 4f
+        val avg = (minTL + minTR + minBR + minBL) / 4f
+        return CornerOffsets(minTL, minTR, minBR, minBL, avg)
+    }
+
+    private fun computeAverageEdgeDistance(points: List<Point>, bounds: RectF): Float {
+        var sumDist = 0.0
+        for (p in points) {
+            val dx = min(abs(p.x - bounds.left), abs(p.x - bounds.right))
+            val dy = min(abs(p.y - bounds.top), abs(p.y - bounds.bottom))
+            sumDist += min(dx, dy)
+        }
+        return (sumDist / points.size).toFloat()
     }
 
     private fun computeArcLength(points: List<Point>): Float {

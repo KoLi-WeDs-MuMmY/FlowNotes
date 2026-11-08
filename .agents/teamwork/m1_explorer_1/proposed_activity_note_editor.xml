@@ -1,0 +1,579 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawer_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- MAIN EDITOR CONTENT -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#E2E8F0">
+
+        <!-- Top Navigation & Action Toolbar -->
+        <HorizontalScrollView
+            android:id="@+id/toolbar_scroll"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@color/bg_surface"
+            android:scrollbars="none"
+            android:elevation="4dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+
+                <!-- Back Button -->
+                <ImageView
+                    android:id="@+id/btn_back"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="8dp"
+                    android:contentDescription="Back"
+                    android:src="@android:drawable/ic_menu_revert"
+                    app:tint="@color/text_primary" />
+
+                <!-- Notebook Title (Click to rename) -->
+                <TextView
+                    android:id="@+id/tv_editor_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxWidth="160dp"
+                    android:singleLine="true"
+                    android:ellipsize="end"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="12dp"
+                    tools:text="Calculus II" />
+
+                <!-- Page Navigation Cluster -->
+                <ImageView
+                    android:id="@+id/btn_prev_page"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:contentDescription="Previous Page"
+                    android:src="@android:drawable/ic_media_previous"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:id="@+id/tv_page_indicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginEnd="4dp"
+                    tools:text="Page 1 of 4" />
+
+                <ImageView
+                    android:id="@+id/btn_next_page"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:contentDescription="Next Page"
+                    android:src="@android:drawable/ic_media_next"
+                    app:tint="@color/text_secondary" />
+
+                <ImageView
+                    android:id="@+id/btn_add_page"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:contentDescription="Add Page"
+                    android:src="@android:drawable/ic_input_add"
+                    app:tint="@color/primary"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="24dp"
+                    android:background="@color/border_color"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Undo / Redo Cluster -->
+                <ImageView
+                    android:id="@+id/btn_undo"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:contentDescription="Undo"
+                    android:src="@android:drawable/ic_menu_revert"
+                    app:tint="@color/text_primary" />
+
+                <ImageView
+                    android:id="@+id/btn_redo"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:padding="6dp"
+                    android:contentDescription="Redo"
+                    android:src="@android:drawable/ic_menu_forward"
+                    app:tint="@color/text_primary"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Paper Template Picker -->
+                <Button
+                    android:id="@+id/btn_change_template"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Template"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text_primary"
+                    android:backgroundTint="#F1F5F9"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- Export PDF -->
+                <Button
+                    android:id="@+id/btn_export_pdf"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="Export PDF"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@color/text_primary"
+                    android:backgroundTint="#F1F5F9"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- Flashcard Study Mode -->
+                <Button
+                    android:id="@+id/btn_flashcards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="@string/flashcards"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/accent"
+                    android:layout_marginEnd="8dp" />
+
+                <!-- AI Study Assistant Drawer Button -->
+                <Button
+                    android:id="@+id/btn_open_ai"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="AI Assistant"
+                    android:textSize="12sp"
+                    android:textAllCaps="false"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="@color/primary" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
+        <!-- Active Recall Tape Quick Actions Bar -->
+        <LinearLayout
+            android:id="@+id/tape_action_strip"
+            android:layout_width="match_parent"
+            android:layout_height="38dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:background="#FEF9C3"
+            app:layout_constraintTop_toBottomOf="@id/toolbar_scroll"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Active Recall Tape Study Mode:"
+                android:textColor="#854D0E"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/btn_reveal_tapes"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text="Reveal All"
+                android:textColor="#1E293B"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/bg_folder_chip"
+                android:layout_marginEnd="8dp"
+                android:clickable="true"
+                android:focusable="true" />
+
+            <TextView
+                android:id="@+id/btn_conceal_tapes"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text="Conceal All (Test)"
+                android:textColor="#B45309"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:background="@drawable/bg_folder_chip"
+                android:clickable="true"
+                android:focusable="true" />
+        </LinearLayout>
+
+        <!-- Main Digital Ink Drawing Canvas View -->
+        <com.flownotes.app.view.CanvasView
+            android:id="@+id/canvas_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            app:layout_constraintTop_toBottomOf="@id/tape_action_strip"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- Floating Pen Dock & Tool Palette Container -->
+        <LinearLayout
+            android:id="@+id/dock_wrapper"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Primary Pen Tools Dock (Must be LinearLayout for child iteration in NoteEditorActivity.kt) -->
+            <LinearLayout
+                android:id="@+id/floating_pen_dock"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:elevation="8dp"
+                android:background="@drawable/bg_floating_dock">
+
+                <!-- Ballpoint Tool -->
+                <TextView
+                    android:id="@+id/tool_ballpoint"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="🖊️"
+                    android:textSize="20sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Ballpoint Pen" />
+
+                <!-- Fountain Pen Tool -->
+                <TextView
+                    android:id="@+id/tool_fountain"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="✒️"
+                    android:textSize="20sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Fountain Pen" />
+
+                <!-- Highlighter Tool -->
+                <TextView
+                    android:id="@+id/tool_highlighter"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="🖍️"
+                    android:textSize="20sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Highlighter" />
+
+                <!-- Stroke Eraser Tool -->
+                <TextView
+                    android:id="@+id/tool_eraser"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="🧹"
+                    android:textSize="20sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Eraser" />
+
+                <!-- Active Recall Tape Tool -->
+                <TextView
+                    android:id="@+id/tool_tape"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="🏷️"
+                    android:textSize="20sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Active Recall Tape" />
+
+                <!-- Geometric Shape Recognizer Tool -->
+                <TextView
+                    android:id="@+id/tool_shape"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="📐"
+                    android:textSize="20sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:contentDescription="Geometric Shape Snapping" />
+            </LinearLayout>
+
+            <!-- Secondary Dock: Color & Stroke Width Presets -->
+            <LinearLayout
+                android:id="@+id/secondary_palette"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginTop="6dp"
+                android:elevation="6dp"
+                android:background="@drawable/bg_floating_dock">
+
+                <!-- Color Swatches -->
+                <View
+                    android:id="@+id/color_black"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="#1E293B"
+                    android:layout_marginEnd="8dp" />
+
+                <View
+                    android:id="@+id/color_blue"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="#3B82F6"
+                    android:layout_marginEnd="8dp" />
+
+                <View
+                    android:id="@+id/color_purple"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="#8B5CF6"
+                    android:layout_marginEnd="8dp" />
+
+                <View
+                    android:id="@+id/color_green"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="#10B981"
+                    android:layout_marginEnd="8dp" />
+
+                <View
+                    android:id="@+id/color_orange"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="#F59E0B"
+                    android:layout_marginEnd="8dp" />
+
+                <View
+                    android:id="@+id/color_red"
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:background="#EF4444"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Palette Divider -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="20dp"
+                    android:background="@color/border_color"
+                    android:layout_marginEnd="12dp" />
+
+                <!-- Stroke Width Selectors -->
+                <TextView
+                    android:id="@+id/size_fine"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:text="•"
+                    android:textColor="@color/text_primary"
+                    android:textSize="22sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp" />
+
+                <TextView
+                    android:id="@+id/size_medium"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:text="●"
+                    android:textColor="@color/text_primary"
+                    android:textSize="18sp"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp" />
+
+                <TextView
+                    android:id="@+id/size_bold"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:gravity="center"
+                    android:text="⬤"
+                    android:textColor="@color/text_primary"
+                    android:textSize="22sp"
+                    android:background="@drawable/bg_tool_button" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- ON-DEVICE AI STUDY DRAWER (100% Offline, Zero Cloud Cost) -->
+    <LinearLayout
+        android:id="@+id/ai_drawer_content"
+        android:layout_width="320dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:background="@color/bg_surface"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="🎓 On-Device AI Study Assistant"
+            android:textColor="@color/text_primary"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="100% Private, Zero Cloud Cost, Zero Server"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp"
+            android:layout_marginTop="2dp"
+            android:layout_marginBottom="16dp" />
+
+        <!-- AI Question Input -->
+        <EditText
+            android:id="@+id/et_ai_question"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:hint="Ask or enter problem to solve..."
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:background="@drawable/bg_folder_chip"
+            android:layout_marginBottom="12dp" />
+
+        <!-- AI Action Buttons Grid -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btn_ai_ask"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:text="Ask Note"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@color/primary"
+                android:layout_marginEnd="6dp" />
+
+            <Button
+                android:id="@+id/btn_ai_summarize"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:text="Summarize"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:backgroundTint="@color/accent" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="14dp">
+
+            <Button
+                android:id="@+id/btn_ai_problem_solver"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:text="Solve Step"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:backgroundTint="#F1F5F9"
+                android:layout_marginEnd="6dp" />
+
+            <Button
+                android:id="@+id/btn_ai_gen_cards"
+                android:layout_width="0dp"
+                android:layout_height="38dp"
+                android:layout_weight="1"
+                android:text="Gen Cards"
+                android:textSize="11sp"
+                android:textAllCaps="false"
+                android:textColor="@color/text_primary"
+                android:backgroundTint="#F1F5F9" />
+        </LinearLayout>
+
+        <!-- AI Output Scroll Area -->
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#F8FAFC"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:id="@+id/tv_ai_output"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Select an AI study action above to analyze your notebook text, synthesize formulas, or generate flashcards."
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:lineSpacingExtra="3dp" />
+        </ScrollView>
+
+        <!-- Insert into Note Button -->
+        <Button
+            android:id="@+id/btn_insert_ai_note"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:text="Insert into Note"
+            android:textSize="13sp"
+            android:textAllCaps="false"
+            android:textColor="@android:color/white"
+            android:backgroundTint="@color/primary" />
+
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

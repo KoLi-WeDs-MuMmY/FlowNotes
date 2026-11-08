@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.flownotes.app">
+
+    <!-- Zero Cloud Cost / 100% Offline App Permissions -->
+    <!-- Voice Memo recording synced to notebook pages -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- External storage read/write for importing/exporting PDF files -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@android:drawable/ic_menu_edit"
+        android:label="@string/app_name"
+        android:roundIcon="@android:drawable/ic_menu_edit"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.FlowNotes">
+
+        <!-- Main Shelf / Dashboard Activity -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- Digital Ink & Active Recall Note Editor -->
+        <activity
+            android:name=".NoteEditorActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize|keyboardHidden" />
+
+        <!-- Spaced Repetition Flashcard Study Mode -->
+        <activity
+            android:name=".FlashcardStudyActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustPan" />
+
+    </application>
+
+</manifest>

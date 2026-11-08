@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FlowNotes</string>
+    <string name="create_notebook">Create Notebook</string>
+    <string name="import_pdf">Import PDF</string>
+    <string name="all_notes">All Notes</string>
+    <string name="study">Study</string>
+    <string name="work">Work</string>
+    <string name="personal">Personal</string>
+    <string name="flashcards">Flashcards</string>
+    <string name="ai_study_assistant">AI Study Assistant</string>
+    <string name="search_hint">Search notes and topics...</string>
+</resources>

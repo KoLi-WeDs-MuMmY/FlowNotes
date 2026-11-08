@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FlowNotes — Freenotes Digital Paper & Active Recall</title>
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Vendor Libraries -->
+  <script src="lib/lucide.min.js"></script>
+  <script src="lib/jspdf.umd.min.js"></script>
+  <script src="lib/pdf.min.js"></script>
+  <!-- FlowNotes Engines -->
+  <script src="js/templates.js"></script>
+  <script src="js/canvas.js"></script>
+</head>
+<body>
+  <div id="app-container">
+    <!-- ============================================================== -->
+    <!-- LIBRARY VIEW: Notebook Shelf & Folder Manager                 -->
+    <!-- ============================================================== -->
+    <div id="library-view">
+      <!-- Left Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-icon">
+            <i data-lucide="book-open"></i>
+          </div>
+          <div>
+            <div class="brand-title">FlowNotes</div>
+            <div class="brand-subtitle">Freenotes Replica</div>
+          </div>
+        </div>
+
+        <nav class="folder-nav">
+          <button class="nav-item active" data-folder="All Notes">
+            <i data-lucide="folder"></i>
+            <span>All Notes</span>
+            <span class="badge" id="badge-all">0</span>
+          </button>
+          <button class="nav-item" data-folder="Study">
+            <i data-lucide="graduation-cap"></i>
+            <span>Study & Courses</span>
+            <span class="badge" id="badge-study">0</span>
+          </button>
+          <button class="nav-item" data-folder="PDF">
+            <i data-lucide="file-text"></i>
+            <span>PDF Documents</span>
+            <span class="badge" id="badge-pdf">0</span>
+          </button>
+          <button class="nav-item" data-folder="Personal">
+            <i data-lucide="user"></i>
+            <span>Personal</span>
+            <span class="badge" id="badge-personal">0</span>
+          </button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <button id="btn-toggle-theme" class="btn-icon" title="Toggle Dark/Light Mode">
+            <i data-lucide="moon"></i>
+          </button>
+          <div style="font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:var(--success); display:inline-block;"></span>
+            <span>100% Offline</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Library Grid -->
+      <main class="library-main">
+        <header class="library-header">
+          <div class="library-title-group">
+            <h1 id="library-title">All Notes</h1>
+            <p>Digital paper notebooks with on-device active recall & zero cloud dependencies</p>
+          </div>
+          <div class="library-actions">
+            <input type="text" id="input-search-notes" placeholder="Search notebooks..." style="width:200px;">
+            <button id="btn-import-pdf" class="btn-secondary">
+              <i data-lucide="file-up"></i>
+              <span>Import PDF</span>
+            </button>
+            <button id="btn-new-notebook" class="btn-primary">
+              <i data-lucide="plus"></i>
+              <span>New Notebook</span>
+            </button>
+          </div>
+        </header>
+
+        <div id="notebooks-grid" class="notebooks-grid">
+          <!-- Dynamically populated notebook cards -->
+        </div>
+      </main>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- NOTEBOOK EDITOR VIEW: Canvas, Pen Dock, Drawers               -->
+    <!-- ============================================================== -->
+    <div id="editor-view">
+      <!-- Top Action Bar -->
+      <header class="editor-header">
+        <div class="header-left">
+          <button id="btn-back-library" class="btn-icon" title="Back to Library">
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <input type="text" id="editor-notebook-title" class="title-input" value="Untitled Notebook" title="Rename Notebook">
+          <button id="btn-page-manager" class="btn-icon" title="Page Thumbnails Drawer">
+            <i data-lucide="layers"></i>
+          </button>
+          <div class="page-indicator-badge">
+            <span id="current-page-num">1</span> / <span id="total-page-num">1</span>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <button id="btn-undo" class="btn-icon" title="Undo (Ctrl+Z)">
+            <i data-lucide="undo"></i>
+          </button>
+          <button id="btn-redo" class="btn-icon" title="Redo (Ctrl+Y)">
+            <i data-lucide="redo"></i>
+          </button>
+          <div class="dock-divider"></div>
+          <button id="btn-prev-page" class="btn-icon" title="Previous Page">
+            <i data-lucide="chevron-left"></i>
+          </button>
+          <button id="btn-next-page" class="btn-icon" title="Next Page">
+            <i data-lucide="chevron-right"></i>
+          </button>
+          <button id="btn-add-page" class="btn-icon" title="Add Page">
+            <i data-lucide="plus-circle"></i>
+          </button>
+          <div class="dock-divider"></div>
+          <button id="btn-template-select" class="btn-icon" title="Change Paper Layout">
+            <i data-lucide="grid"></i>
+          </button>
+          <button id="btn-clear-canvas" class="btn-icon" title="Clear Current Page">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+
+        <div class="header-right">
+          <button id="btn-reveal-all-tapes" class="btn-icon" title="Reveal All Tapes (Active Recall)">
+            <i data-lucide="eye"></i>
+          </button>
+          <button id="btn-conceal-all-tapes" class="btn-icon" title="Conceal All Tapes (Active Recall)">
+            <i data-lucide="eye-off"></i>
+          </button>
+          <button id="btn-flashcards-toggle" class="btn-icon" title="Spaced Repetition Flashcards">
+            <i data-lucide="layers-3"></i>
+          </button>
+          <button id="btn-export-pdf" class="btn-icon" title="Export as Multi-page PDF">
+            <i data-lucide="download"></i>
+          </button>
+          <button id="btn-ai-toggle" class="btn-ai-sparkle" title="On-Device Study AI">
+            <i data-lucide="sparkles"></i>
+            <span>AI Study</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Signature Floating Pen Dock -->
+      <div class="floating-dock-container">
+        <div class="pen-dock">
+          <button class="dock-tool active" data-tool="pen" title="Ballpoint Pen (Smooth line)">
+            <i data-lucide="pen-tool"></i>
+          </button>
+          <button class="dock-tool" data-tool="fountain" title="Fountain Pen (Pressure & speed)">
+            <i data-lucide="feather"></i>
+          </button>
+          <button class="dock-tool" data-tool="highlighter" title="Highlighter (Semi-transparent)">
+            <i data-lucide="highlighter"></i>
+          </button>
+          <button class="dock-tool" data-tool="pencil" title="Textured Pencil">
+            <i data-lucide="pencil"></i>
+          </button>
+          <div class="dock-divider"></div>
+          <button class="dock-tool" data-tool="eraser" title="Stroke Eraser (Touch deletion)">
+            <i data-lucide="eraser"></i>
+          </button>
+          <button class="dock-tool" data-tool="tape" title="Active Recall Tape (Tap-to-reveal)">
+            <i data-lucide="tag"></i>
+          </button>
+          <button class="dock-tool" data-tool="shape" title="Geometric Shape Snapper">
+            <i data-lucide="shapes"></i>
+          </button>
+          <button class="dock-tool" data-tool="lasso" title="Lasso Selector">
+            <i data-lucide="lasso"></i>
+          </button>
+          <button class="dock-tool" data-tool="laser" title="Laser Pointer">
+            <i data-lucide="wand-2"></i>
+          </button>
+          <div class="dock-divider"></div>
+          <button class="dock-tool" data-tool="sticky" title="Add Sticky Note">
+            <i data-lucide="file-text"></i>
+          </button>
+        </div>
+
+        <!-- Color & Size Presets Subbar -->
+        <div class="dock-subbar">
+          <div class="color-presets">
+            <div class="color-dot active" data-color="#1e293b" style="background:#1e293b;" title="Charcoal Black"></div>
+            <div class="color-dot" data-color="#3b82f6" style="background:#3b82f6;" title="Sapphire Blue"></div>
+            <div class="color-dot" data-color="#ef4444" style="background:#ef4444;" title="Crimson Red"></div>
+            <div class="color-dot" data-color="#10b981" style="background:#10b981;" title="Emerald Green"></div>
+            <div class="color-dot" data-color="#f59e0b" style="background:#f59e0b;" title="Amber Yellow"></div>
+            <div class="color-dot" data-color="#8b5cf6" style="background:#8b5cf6;" title="Royal Purple"></div>
+          </div>
+          <div class="dock-divider"></div>
+          <div class="size-presets">
+            <div class="size-dot active" data-size="1.8" title="Fine (1.8px)"><span style="width:4px; height:4px;"></span></div>
+            <div class="size-dot" data-size="3.2" title="Medium (3.2px)"><span style="width:7px; height:7px;"></span></div>
+            <div class="size-dot" data-size="6.0" title="Thick (6.0px)"><span style="width:11px; height:11px;"></span></div>
+            <div class="size-dot" data-size="12.0" title="Marker (12.0px)"><span style="width:16px; height:16px;"></span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Canvas Scrollable Workspace -->
+      <div id="canvas-workspace" class="canvas-workspace">
+        <div id="paper-sheet" class="paper-sheet-container">
+          <canvas id="bg-canvas"></canvas>
+          <canvas id="draw-canvas"></canvas>
+          <canvas id="tape-canvas"></canvas>
+          <canvas id="ui-canvas"></canvas>
+          <div id="objects-overlay" class="objects-overlay"></div>
+        </div>
+      </div>
+
+      <!-- Right Drawer: On-Device AI Assistant -->
+      <aside id="ai-drawer" class="side-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <i data-lucide="sparkles" style="color:var(--accent);"></i>
+            <span>AI Study Assistant</span>
+          </div>
+          <button id="btn-close-ai" class="btn-icon">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="drawer-body">
+          <div class="ai-quick-actions">
+            <button id="btn-ai-action-summary" class="ai-action-btn">
+              <i data-lucide="file-text"></i>
+              <span>📝 Study Summary</span>
+            </button>
+            <button id="btn-ai-action-formula" class="ai-action-btn">
+              <i data-lucide="sigma"></i>
+              <span>📐 Extract Formulas</span>
+            </button>
+            <button id="btn-ai-action-flashcards" class="ai-action-btn">
+              <i data-lucide="layers-3"></i>
+              <span>🗂️ Generate Deck</span>
+            </button>
+            <button id="btn-ai-action-solve" class="ai-action-btn">
+              <i data-lucide="check-circle-2"></i>
+              <span>💡 Step Solver</span>
+            </button>
+          </div>
+          <div id="ai-chat-messages" class="chat-messages">
+            <div class="chat-bubble assistant">
+              <p><strong>FlowNotes AI Assistant:</strong> I'm running 100% on-device with zero cloud costs.</p>
+              <p>Tap a quick action above or ask any question about your notes!</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-input-bar">
+          <input type="text" id="ai-chat-input" class="chat-input" placeholder="Ask about your notes...">
+          <button id="btn-send-ai" class="btn-primary" style="padding:8px 14px;">
+            <i data-lucide="send"></i>
+          </button>
+        </div>
+      </aside>
+
+      <!-- Right Drawer: Spaced Repetition Flashcards -->
+      <aside id="flashcard-drawer" class="side-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <i data-lucide="layers-3" style="color:var(--primary);"></i>
+            <span>Flashcard SRS Study</span>
+          </div>
+          <button id="btn-close-flashcards" class="btn-icon">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div class="drawer-body">
+          <div class="flashcard-container">
+            <div id="study-flashcard" class="flashcard">
+              <div class="card-face front">
+                <div class="card-label">Question (Tap card to flip)</div>
+                <div id="card-front-text" class="card-text">Loading deck...</div>
+                <div id="card-hint-text" style="font-size:12px; color:var(--text-muted); margin-top:14px;">Hint: Tap to flip</div>
+              </div>
+              <div class="card-face back">
+                <div class="card-label">Answer</div>
+                <div id="card-back-text" class="card-text">Loading...</div>
+              </div>
+            </div>
+            <div class="flashcard-rating-bar">
+              <button id="btn-rate-again" class="rate-btn again">Again (1d)</button>
+              <button id="btn-rate-good" class="rate-btn good">Good (3d)</button>
+              <button id="btn-rate-easy" class="rate-btn easy">Easy (7d)</button>
+            </div>
+            <div id="flashcard-study-progress" style="font-size:12px; color:var(--text-secondary); text-align:center;">Card 1 of 4</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Left Drawer: Page Manager / Thumbnails -->
+      <aside id="page-manager-drawer" class="page-manager-drawer">
+        <div class="drawer-header">
+          <div class="drawer-title">
+            <i data-lucide="layers"></i>
+            <span>Pages</span>
+          </div>
+          <button id="btn-close-pages" class="btn-icon">
+            <i data-lucide="x"></i>
+          </button>
+        </div>
+        <div id="pages-thumbnails-grid" class="pages-grid">
+          <!-- Dynamically populated page thumbnails -->
+        </div>
+        <div class="modal-footer" style="background:var(--bg-surface);">
+          <button id="btn-drawer-add-page" class="btn-primary" style="width:100%;">
+            <i data-lucide="plus"></i>
+            <span>Add New Page</span>
+          </button>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- MODALS: New Notebook, Template Chooser, PDF Loader             -->
+    <!-- ============================================================== -->
+    <!-- Modal: New Notebook -->
+    <div id="modal-new-notebook" class="modal-overlay">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Create New Notebook</h3>
+          <button class="btn-icon modal-close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label" for="input-nb-title">Notebook Title</label>
+            <input type="text" id="input-nb-title" placeholder="e.g. Organic Chemistry Lecture Notes">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Folder Category</label>
+            <select id="select-nb-folder">
+              <option value="All Notes">All Notes</option>
+              <option value="Study">Study & Courses</option>
+              <option value="PDF">PDF Documents</option>
+              <option value="Personal">Personal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Cover Color</label>
+            <div id="modal-cover-colors" class="cover-color-choices">
+              <div class="color-dot active" data-color="#3b82f6" style="background:#3b82f6; width:28px; height:28px;"></div>
+              <div class="color-dot" data-color="#8b5cf6" style="background:#8b5cf6; width:28px; height:28px;"></div>
+              <div class="color-dot" data-color="#10b981" style="background:#10b981; width:28px; height:28px;"></div>
+              <div class="color-dot" data-color="#f59e0b" style="background:#f59e0b; width:28px; height:28px;"></div>
+              <div class="color-dot" data-color="#ef4444" style="background:#ef4444; width:28px; height:28px;"></div>
+              <div class="color-dot" data-color="#475569" style="background:#475569; width:28px; height:28px;"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Default Paper Template</label>
+            <div id="modal-paper-templates" class="template-choices">
+              <div class="template-chip active" data-template="ruled">Standard Ruled</div>
+              <div class="template-chip" data-template="college">College Ruled</div>
+              <div class="template-chip" data-template="cornell">Cornell Notes</div>
+              <div class="template-chip" data-template="grid">5mm Grid</div>
+              <div class="template-chip" data-template="dotted">Dot Grid</div>
+              <div class="template-chip" data-template="planner">Study Planner</div>
+              <div class="template-chip" data-template="sepia">Vintage Sepia</div>
+              <div class="template-chip" data-template="dark_grid">Dark Grid</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary modal-close">Cancel</button>
+          <button id="btn-modal-create-nb" class="btn-primary">Create Notebook</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Change Page Paper Template -->
+    <div id="modal-templates" class="modal-overlay">
+      <div class="modal-dialog">
+        <div class="modal-header">
+          <h3>Change Paper Layout</h3>
+          <button class="btn-icon modal-close"><i data-lucide="x"></i></button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:13px; color:var(--text-secondary);">Select procedural background for the current page:</p>
+          <div id="editor-template-choices" class="template-choices" style="margin-top:8px;">
+            <div class="template-chip" data-template="blank">Blank Sheet</div>
+            <div class="template-chip active" data-template="ruled">Standard Ruled</div>
+            <div class="template-chip" data-template="college">College Ruled</div>
+            <div class="template-chip" data-template="cornell">Cornell Notes</div>
+            <div class="template-chip" data-template="grid">5mm Grid</div>
+            <div class="template-chip" data-template="dotted">Dot Grid</div>
+            <div class="template-chip" data-template="planner">Study Planner</div>
+            <div class="template-chip" data-template="sepia">Vintage Sepia</div>
+            <div class="template-chip" data-template="dark_grid">Dark Slate Grid</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary modal-close">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden PDF File Input -->
+    <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+  </div>
+
+  <!-- Companion Client Application Script -->
+  <script>
+    (function () {
+      "use strict";
+
+      // Application State
+      const AppState = {
+        currentView: "library", // 'library' or 'editor'
+        notebooks: [],
+        activeNotebook: null,
+        currentPageIndex: 0,
+        canvasEngine: null,
+        activeFolder: "All Notes",
+        flashcardDeck: [],
+        flashcardIndex: 0,
+        newNotebookColor: "#3b82f6",
+        newNotebookTemplate: "ruled"
+      };
+
+      // Initialize Lucide Icons
+      function initIcons() {
+        if (window.lucide) {
+          window.lucide.createIcons();
+        }
+      }
+
+      // Toast Notification Helper
+      function showToast(message, duration = 3000) {
+        const container = document.getElementById("toast-container");
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.textContent = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+          toast.style.opacity = "0";
+          setTimeout(() => toast.remove(), 300);
+        }, duration);
+      }
+
+      // Format Date Helper
+      function formatTime(timestamp) {
+        if (!timestamp) return "Recently";
+        const date = new Date(timestamp);
+        return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+      }
+
+      // ==============================================================
+      // REST API SERVICE (Communicates with server.py on 127.0.0.1:8080)
+      // ==============================================================
+      const API = {
+        async listNotes() {
+          try {
+            const res = await fetch("/api/notes");
+            const data = await res.json();
+            return data.notes || [];
+          } catch (e) {
+            console.warn("API listNotes fallback:", e);
+            return [];
+          }
+        },
+        async getNote(id) {
+          const res = await fetch(`/api/notes/${id}`);
+          if (!res.ok) throw new Error("Failed to load notebook");
+          return await res.json();
+        },
+        async saveNote(noteData) {
+          const res = await fetch("/api/notes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(noteData)
+          });
+          return await res.json();
+        },
+        async deleteNote(id) {
+          const res = await fetch(`/api/notes/${id}`, { method: "DELETE" });
+          return await res.json();
+        },
+        async askAi(prompt, mode, context) {
+          const res = await fetch("/api/ai/chat", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt, mode, context })
+          });
+          return await res.json();
+        },
+        async generateFlashcards(title, context) {
+          const res = await fetch("/api/ai/flashcards", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ title, context })
+          });
+          return await res.json();
+        },
+        async uploadPdf(file) {
+          const res = await fetch("/api/upload-pdf", {
+            method: "POST",
+            headers: { "Content-Type": file.type || "application/pdf" },
+            body: file
+          });
+          return await res.json();
+        }
+      };
+
+      // ==============================================================
+      // VIEW NAVIGATION
+      // ==============================================================
+      function switchView(viewName) {
+        AppState.currentView = viewName;
+        const libraryView = document.getElementById("library-view");
+        const editorView = document.getElementById("editor-view");
+
+        if (viewName === "editor") {
+          libraryView.style.display = "none";
+          editorView.style.display = "flex";
+        } else {
+          editorView.style.display = "none";
+          libraryView.style.display = "flex";
+          closeAllDrawers();
+          refreshLibrary();
+        }
+        initIcons();
+      }
+
+      function closeAllDrawers() {
+        document.querySelectorAll(".side-drawer, .page-manager-drawer").forEach(d => d.classList.remove("open"));
+      }
+
+      // ==============================================================
+      // LIBRARY CONTROLLER
+      // ==============================================================
+      async function refreshLibrary() {
+        const grid = document.getElementById("notebooks-grid");
+        grid.innerHTML = "<div style='color:var(--text-muted); padding:20px;'>Loading notebooks...</div>";
+
+        try {
+          AppState.notebooks = await API.listNotes();
+        } catch (e) {
+          AppState.notebooks = [];
+        }
+
+        renderLibraryGrid();
+        updateFolderBadges();
+      }
+
+      function updateFolderBadges() {
+        const allCount = AppState.notebooks.length;
+        const studyCount = AppState.notebooks.filter(n => n.folder === "Study").length;
+        const pdfCount = AppState.notebooks.filter(n => n.hasPdf || n.folder === "PDF").length;
+        const personalCount = AppState.notebooks.filter(n => n.folder === "Personal").length;
+
+        document.getElementById("badge-all").textContent = allCount;
+        document.getElementById("badge-study").textContent = studyCount;
+        document.getElementById("badge-pdf").textContent = pdfCount;
+        document.getElementById("badge-personal").textContent = personalCount;
+      }
+
+      function renderLibraryGrid() {
+        const grid = document.getElementById("notebooks-grid");
+        const searchQuery = (document.getElementById("input-search-notes").value || "").toLowerCase();
+
+        let filtered = AppState.notebooks;
+        if (AppState.activeFolder !== "All Notes") {
+          if (AppState.activeFolder === "PDF") {
+            filtered = filtered.filter(n => n.hasPdf || n.folder === "PDF");
+          } else {
+            filtered = filtered.filter(n => n.folder === AppState.activeFolder);
+          }
+        }
+        if (searchQuery) {
+          filtered = filtered.filter(n => (n.title || "").toLowerCase().includes(searchQuery));
+        }
+
+        if (filtered.length === 0) {
+          grid.innerHTML = `
+            <div style="grid-column: 1/-1; text-align:center; padding: 60px 20px; color:var(--text-muted);">
+              <i data-lucide="book-open" style="width:48px; height:48px; margin-bottom:12px; stroke-width:1.2;"></i>
+              <h3 style="font-size:18px; color:var(--text-primary); margin-bottom:6px;">No notebooks found</h3>
+              <p style="font-size:14px; margin-bottom:18px;">Create your first digital paper notebook or import a PDF lecture.</p>
+              <button id="btn-empty-new" class="btn-primary" style="margin:0 auto;">
+                <i data-lucide="plus"></i><span>Create Notebook</span>
+              </button>
+            </div>
+          `;
+          const emptyBtn = document.getElementById("btn-empty-new");
+          if (emptyBtn) emptyBtn.addEventListener("click", openNewNotebookModal);
+          initIcons();
+          return;
+        }
+
+        grid.innerHTML = filtered.map(nb => {
+          const color = nb.coverColor || "#3b82f6";
+          const count = nb.pageCount || 1;
+          return `
+            <div class="notebook-card" data-id="${nb.id}">
+              <div class="notebook-cover" style="background: linear-gradient(135deg, ${color}, #1e293b);">
+                <div class="cover-badge">${escapeHtml(nb.title || "Untitled")}</div>
+                ${nb.hasPdf ? '<span class="pdf-tag">PDF</span>' : ''}
+                <button class="notebook-menu-btn" data-id="${nb.id}" title="Delete Notebook">
+                  <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
+                </button>
+              </div>
+              <div class="notebook-meta">
+                <div class="notebook-title">${escapeHtml(nb.title || "Untitled")}</div>
+                <div class="notebook-info">
+                  <span>${count} ${count === 1 ? "page" : "pages"}</span>
+                  <span>${formatTime(nb.updatedAt)}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Attach Card Click Events
+        grid.querySelectorAll(".notebook-card").forEach(card => {
+          card.addEventListener("click", (e) => {
+            if (e.target.closest(".notebook-menu-btn")) return;
+            const id = card.getAttribute("data-id");
+            openNotebook(id);
+          });
+        });
+
+        // Attach Delete Events
+        grid.querySelectorAll(".notebook-menu-btn").forEach(btn => {
+          btn.addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const id = btn.getAttribute("data-id");
+            if (confirm("Delete this notebook and all its pages?")) {
+              await API.deleteNote(id);
+              showToast("Notebook deleted");
+              refreshLibrary();
+            }
+          });
+        });
+
+        initIcons();
+      }
+
+      function escapeHtml(str) {
+        return (str || "").replace(/[&<>'"]/g, tag => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+        }[tag] || tag));
+      }
+
+      // ==============================================================
+      // EDITOR CONTROLLER
+      // ==============================================================
+      async function openNotebook(id) {
+        showToast("Opening notebook...");
+        try {
+          const nb = await API.getNote(id);
+          AppState.activeNotebook = nb;
+          if (!AppState.activeNotebook.pages || AppState.activeNotebook.pages.length === 0) {
+            AppState.activeNotebook.pages = [{
+              pageNumber: 1,
+              paperType: nb.defaultPaperType || "ruled",
+              strokes: [],
+              tapes: [],
+              stickyNotes: []
+            }];
+          }
+          AppState.currentPageIndex = 0;
+          switchView("editor");
+          setupEditorView();
+        } catch (e) {
+          showToast("Failed to load notebook");
+          console.error(e);
+        }
+      }
+
+      function setupEditorView() {
+        const nb = AppState.activeNotebook;
+        document.getElementById("editor-notebook-title").value = nb.title || "Untitled Note";
+
+        // Initialize Canvas Engine if not already created
+        if (!AppState.canvasEngine) {
+          AppState.canvasEngine = new window.FlowCanvasEngine("paper-sheet", {
+            width: 850,
+            height: 1150
+          });
+          setupCanvasInteractions();
+        }
+
+        renderCurrentPage();
+      }
+
+      function renderCurrentPage() {
+        const nb = AppState.activeNotebook;
+        const page = nb.pages[AppState.currentPageIndex];
+
+        // Update page indicators
+        document.getElementById("current-page-num").textContent = AppState.currentPageIndex + 1;
+        document.getElementById("total-page-num").textContent = nb.pages.length;
+
+        // Render paper background
+        const bgCanvas = document.getElementById("bg-canvas");
+        const paperType = (page.paperType || nb.defaultPaperType || "ruled").toLowerCase();
+        window.PaperTemplates.render(bgCanvas, paperType, {
+          dpr: window.devicePixelRatio || 1,
+          dark: document.documentElement.getAttribute("data-theme") === "dark"
+        });
+
+        // Load ink strokes and active recall tapes into canvas engine
+        const engine = AppState.canvasEngine;
+        engine.strokes = page.strokes || [];
+        engine.tapes = (page.tapes || []).map(t => ({
+          id: t.id || "tape_" + Math.random(),
+          x: t.left !== undefined ? t.left : (t.x || 0),
+          y: t.top !== undefined ? t.top : (t.y || 0),
+          w: t.right !== undefined ? (t.right - t.left) : (t.w || 120),
+          h: t.bottom !== undefined ? (t.bottom - t.top) : (t.h || 28),
+          color: t.color || "#fef08a",
+          revealed: !!t.revealed
+        }));
+        engine.undoStack = [];
+        engine.redoStack = [];
+
+        engine.redrawStrokes();
+        engine.redrawTapes();
+        renderStickyNotes(page.stickyNotes || []);
+      }
+
+      function syncCurrentPageData() {
+        if (!AppState.activeNotebook) return;
+        const page = AppState.activeNotebook.pages[AppState.currentPageIndex];
+        const engine = AppState.canvasEngine;
+
+        page.strokes = engine.strokes;
+        page.tapes = engine.tapes.map(t => ({
+          id: t.id,
+          left: t.x,
+          top: t.y,
+          right: t.x + t.w,
+          bottom: t.y + t.h,
+          color: t.color,
+          revealed: t.revealed
+        }));
+      }
+
+      async function autoSaveNotebook() {
+        if (!AppState.activeNotebook) return;
+        syncCurrentPageData();
+        try {
+          await API.saveNote(AppState.activeNotebook);
+        } catch (e) {
+          console.warn("Auto-save failed:", e);
+        }
+      }
+
+      function setupCanvasInteractions() {
+        const engine = AppState.canvasEngine;
+
+        // Dock Tool Selection
+        document.querySelectorAll(".dock-tool").forEach(toolBtn => {
+          toolBtn.addEventListener("click", () => {
+            const tool = toolBtn.getAttribute("data-tool");
+            if (tool === "sticky") {
+              addStickyNote();
+              return;
+            }
+            document.querySelectorAll(".dock-tool").forEach(b => b.classList.remove("active"));
+            toolBtn.classList.add("active");
+            engine.currentTool = tool;
+            if (tool === "eraser") engine.eraserType = "stroke";
+          });
+        });
+
+        // Color Presets
+        document.querySelectorAll(".color-dot[data-color]").forEach(dot => {
+          dot.addEventListener("click", () => {
+            document.querySelectorAll(".dock-subbar .color-dot").forEach(d => d.classList.remove("active"));
+            dot.classList.add("active");
+            const color = dot.getAttribute("data-color");
+            engine.currentColor = color;
+          });
+        });
+
+        // Size Presets
+        document.querySelectorAll(".size-dot[data-size]").forEach(dot => {
+          dot.addEventListener("click", () => {
+            document.querySelectorAll(".size-presets .size-dot").forEach(d => d.classList.remove("active"));
+            dot.classList.add("active");
+            const size = parseFloat(dot.getAttribute("data-size"));
+            engine.currentSize = size;
+          });
+        });
+
+        // Header Actions
+        document.getElementById("btn-undo").addEventListener("click", () => {
+          engine.undo();
+          autoSaveNotebook();
+        });
+        document.getElementById("btn-redo").addEventListener("click", () => {
+          engine.redo();
+          autoSaveNotebook();
+        });
+        document.getElementById("btn-clear-canvas").addEventListener("click", () => {
+          if (confirm("Clear all handwriting strokes and tapes on this page?")) {
+            engine.clearPage();
+            autoSaveNotebook();
+          }
+        });
+
+        // Page Navigation
+        document.getElementById("btn-prev-page").addEventListener("click", () => {
+          if (AppState.currentPageIndex > 0) {
+            syncCurrentPageData();
+            AppState.currentPageIndex--;
+            renderCurrentPage();
+            autoSaveNotebook();
+          }
+        });
+
+        document.getElementById("btn-next-page").addEventListener("click", () => {
+          if (AppState.currentPageIndex < AppState.activeNotebook.pages.length - 1) {
+            syncCurrentPageData();
+            AppState.currentPageIndex++;
+            renderCurrentPage();
+            autoSaveNotebook();
+          }
+        });
+
+        document.getElementById("btn-add-page").addEventListener("click", addNewPage);
+
+        // Active Recall Tapes: Reveal / Conceal All
+        document.getElementById("btn-reveal-all-tapes").addEventListener("click", () => {
+          engine.toggleAllTapes(true);
+          showToast("All Active Recall Tapes Revealed");
+          autoSaveNotebook();
+        });
+
+        document.getElementById("btn-conceal-all-tapes").addEventListener("click", () => {
+          engine.toggleAllTapes(false);
+          showToast("All Active Recall Tapes Concealed");
+          autoSaveNotebook();
+        });
+
+        // Back to library
+        document.getElementById("btn-back-library").addEventListener("click", async () => {
+          syncCurrentPageData();
+          await autoSaveNotebook();
+          switchView("library");
+        });
+
+        // Title rename
+        document.getElementById("editor-notebook-title").addEventListener("change", (e) => {
+          AppState.activeNotebook.title = e.target.value.trim() || "Untitled Note";
+          autoSaveNotebook();
+        });
+      }
+
+      function addNewPage() {
+        syncCurrentPageData();
+        const nb = AppState.activeNotebook;
+        const newPageNum = nb.pages.length + 1;
+        nb.pages.push({
+          pageNumber: newPageNum,
+          paperType: nb.defaultPaperType || "ruled",
+          strokes: [],
+          tapes: [],
+          stickyNotes: []
+        });
+        AppState.currentPageIndex = nb.pages.length - 1;
+        renderCurrentPage();
+        autoSaveNotebook();
+        showToast(`Page ${newPageNum} added`);
+      }
+
+      // ==============================================================
+      // STICKY NOTES ENGINE
+      // ==============================================================
+      function addStickyNote(content = "Note reminder", x = 120, y = 140) {
+        const overlay = document.getElementById("objects-overlay");
+        const noteId = "sticky_" + Date.now();
+        const note = document.createElement("div");
+        note.className = "note-object sticky-note";
+        note.id = noteId;
+        note.style.left = `${x}px`;
+        note.style.top = `${y}px`;
+
+        note.innerHTML = `
+          <div class="sticky-header">
+            <span>Sticky Note</span>
+            <button style="color:inherit; font-size:12px; cursor:pointer;" title="Delete">✕</button>
+          </div>
+          <div class="sticky-content" contenteditable="true">${content}</div>
+        `;
+
+        overlay.appendChild(note);
+
+        // Delete button
+        note.querySelector("button").addEventListener("click", () => {
+          note.remove();
+          saveStickyNotesState();
+        });
+
+        // Make draggable
+        makeDraggable(note);
+
+        note.querySelector(".sticky-content").addEventListener("input", () => {
+          saveStickyNotesState();
+        });
+
+        saveStickyNotesState();
+      }
+
+      function renderStickyNotes(stickies) {
+        const overlay = document.getElementById("objects-overlay");
+        overlay.innerHTML = "";
+        stickies.forEach(s => {
+          addStickyNote(s.content || "", s.x || 100, s.y || 100);
+        });
+      }
+
+      function saveStickyNotesState() {
+        if (!AppState.activeNotebook) return;
+        const page = AppState.activeNotebook.pages[AppState.currentPageIndex];
+        const overlay = document.getElementById("objects-overlay");
+        page.stickyNotes = Array.from(overlay.querySelectorAll(".sticky-note")).map(el => ({
+          id: el.id,
+          x: parseFloat(el.style.left) || 0,
+          y: parseFloat(el.style.top) || 0,
+          content: el.querySelector(".sticky-content").innerText
+        }));
+        autoSaveNotebook();
+      }
+
+      function makeDraggable(el) {
+        let isDragging = false;
+        let startX, startY, origX, origY;
+
+        const header = el.querySelector(".sticky-header") || el;
+        header.addEventListener("pointerdown", (e) => {
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          origX = parseFloat(el.style.left) || 0;
+          origY = parseFloat(el.style.top) || 0;
+          header.setPointerCapture(e.pointerId);
+          e.stopPropagation();
+        });
+
+        header.addEventListener("pointermove", (e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          el.style.left = `${origX + dx}px`;
+          el.style.top = `${origY + dy}px`;
+        });
+
+        const stop = (e) => {
+          if (isDragging) {
+            isDragging = false;
+            saveStickyNotesState();
+          }
+        };
+        header.addEventListener("pointerup", stop);
+        header.addEventListener("pointercancel", stop);
+      }
+
+      // ==============================================================
+      // AI ASSISTANT DRAWER
+      // ==============================================================
+      function setupAiDrawer() {
+        const aiDrawer = document.getElementById("ai-drawer");
+        document.getElementById("btn-ai-toggle").addEventListener("click", () => {
+          aiDrawer.classList.toggle("open");
+        });
+        document.getElementById("btn-close-ai").addEventListener("click", () => {
+          aiDrawer.classList.remove("open");
+        });
+
+        // Quick Actions
+        document.getElementById("btn-ai-action-summary").addEventListener("click", () => sendAiQuery("summarize", "Summarize this page"));
+        document.getElementById("btn-ai-action-formula").addEventListener("click", () => sendAiQuery("formula", "Extract formulas and math laws"));
+        document.getElementById("btn-ai-action-solve").addEventListener("click", () => sendAiQuery("homework", "Step-by-step problem breakdown"));
+        document.getElementById("btn-ai-action-flashcards").addEventListener("click", () => {
+          openFlashcardStudy();
+        });
+
+        // Chat input
+        document.getElementById("btn-send-ai").addEventListener("click", () => {
+          const input = document.getElementById("ai-chat-input");
+          const query = input.value.trim();
+          if (query) {
+            sendAiQuery("chat", query);
+            input.value = "";
+          }
+        });
+        document.getElementById("ai-chat-input").addEventListener("keydown", (e) => {
+          if (e.key === "Enter") {
+            document.getElementById("btn-send-ai").click();
+          }
+        });
+      }
+
+      async function sendAiQuery(mode, prompt) {
+        const chatBox = document.getElementById("ai-chat-messages");
+        appendChatBubble(prompt, "user");
+
+        const loadingBubble = appendChatBubble("Thinking on-device...", "assistant");
+
+        try {
+          const context = AppState.activeNotebook ? (AppState.activeNotebook.title + " - Notes & Study Formulas") : "";
+          const result = await API.askAi(prompt, mode, context);
+          loadingBubble.innerHTML = formatMarkdown(result.response || "No response received.");
+        } catch (e) {
+          loadingBubble.textContent = "AI engine error: offline model unavailable.";
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+      }
+
+      function appendChatBubble(text, role) {
+        const chatBox = document.getElementById("ai-chat-messages");
+        const bubble = document.createElement("div");
+        bubble.className = `chat-bubble ${role}`;
+        bubble.textContent = text;
+        chatBox.appendChild(bubble);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        return bubble;
+      }
+
+      function formatMarkdown(md) {
+        return md
+          .replace(/### (.*?)\n/g, '<h4 style="margin:6px 0; font-size:14px;">$1</h4>')
+          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+          .replace(/\*(.*?)\*/g, '<em>$1</em>')
+          .replace(/\n\n/g, '<br><br>')
+          .replace(/- (.*?)\n/g, '• $1<br>');
+      }
+
+      // ==============================================================
+      // FLASHCARDS SRS DRAWER & 3D CARD FLIP
+      // ==============================================================
+      function setupFlashcardDrawer() {
+        const drawer = document.getElementById("flashcard-drawer");
+        document.getElementById("btn-flashcards-toggle").addEventListener("click", openFlashcardStudy);
+        document.getElementById("btn-close-flashcards").addEventListener("click", () => {
+          drawer.classList.remove("open");
+        });
+
+        const card = document.getElementById("study-flashcard");
+        card.addEventListener("click", () => {
+          card.classList.toggle("flipped");
+        });
+
+        // SRS Rating Buttons (SuperMemo SM-2)
+        document.getElementById("btn-rate-again").addEventListener("click", () => nextFlashcard(1));
+        document.getElementById("btn-rate-good").addEventListener("click", () => nextFlashcard(3));
+        document.getElementById("btn-rate-easy").addEventListener("click", () => nextFlashcard(4));
+      }
+
+      async function openFlashcardStudy() {
+        const drawer = document.getElementById("flashcard-drawer");
+        drawer.classList.add("open");
+
+        showToast("Generating on-device cards...");
+        const title = AppState.activeNotebook ? AppState.activeNotebook.title : "Study Deck";
+        const res = await API.generateFlashcards(title, "Key formulas, definitions, and active recall concepts.");
+        AppState.flashcardDeck = res.cards || [];
+        AppState.flashcardIndex = 0;
+        showCurrentCard();
+      }
+
+      function showCurrentCard() {
+        const cardEl = document.getElementById("study-flashcard");
+        cardEl.classList.remove("flipped");
+
+        if (AppState.flashcardDeck.length === 0) {
+          document.getElementById("card-front-text").textContent = "No flashcards generated yet.";
+          document.getElementById("card-back-text").textContent = "";
+          return;
+        }
+
+        const card = AppState.flashcardDeck[AppState.flashcardIndex];
+        document.getElementById("card-front-text").textContent = card.front;
+        document.getElementById("card-back-text").textContent = card.back;
+        document.getElementById("card-hint-text").textContent = card.hint ? `Hint: ${card.hint}` : "Tap card to flip";
+        document.getElementById("flashcard-study-progress").textContent =
+          `Card ${AppState.flashcardIndex + 1} of ${AppState.flashcardDeck.length}`;
+      }
+
+      function nextFlashcard(rating) {
+        if (AppState.flashcardIndex < AppState.flashcardDeck.length - 1) {
+          AppState.flashcardIndex++;
+          showCurrentCard();
+        } else {
+          showToast("🎉 Deck review completed! Great work.");
+          document.getElementById("flashcard-drawer").classList.remove("open");
+        }
+      }
+
+      // ==============================================================
+      // PAGE THUMBNAILS DRAWER
+      // ==============================================================
+      function setupPageManagerDrawer() {
+        const drawer = document.getElementById("page-manager-drawer");
+        document.getElementById("btn-page-manager").addEventListener("click", () => {
+          drawer.classList.toggle("open");
+          if (drawer.classList.contains("open")) renderPageThumbnails();
+        });
+        document.getElementById("btn-close-pages").addEventListener("click", () => {
+          drawer.classList.remove("open");
+        });
+        document.getElementById("btn-drawer-add-page").addEventListener("click", () => {
+          addNewPage();
+          renderPageThumbnails();
+        });
+      }
+
+      function renderPageThumbnails() {
+        const grid = document.getElementById("pages-thumbnails-grid");
+        const nb = AppState.activeNotebook;
+        if (!nb) return;
+
+        grid.innerHTML = nb.pages.map((p, idx) => `
+          <div class="page-thumbnail-card ${idx === AppState.currentPageIndex ? 'active' : ''}" data-idx="${idx}">
+            <div style="flex:1; display:flex; align-items:center; justify-content:center; color:var(--text-muted); font-size:12px;">
+              ${(p.paperType || "ruled").toUpperCase()}
+            </div>
+            <div class="thumb-num">Page ${idx + 1}</div>
+          </div>
+        `).join("");
+
+        grid.querySelectorAll(".page-thumbnail-card").forEach(c => {
+          c.addEventListener("click", () => {
+            const idx = parseInt(c.getAttribute("data-idx"), 10);
+            syncCurrentPageData();
+            AppState.currentPageIndex = idx;
+            renderCurrentPage();
+            renderPageThumbnails();
+          });
+        });
+      }
+
+      // ==============================================================
+      // MODALS: New Notebook & Template Chooser
+      // ==============================================================
+      function openNewNotebookModal() {
+        document.getElementById("modal-new-notebook").classList.add("open");
+        document.getElementById("input-nb-title").value = "";
+        document.getElementById("input-nb-title").focus();
+      }
+
+      function setupModals() {
+        document.getElementById("btn-new-notebook").addEventListener("click", openNewNotebookModal);
+
+        document.querySelectorAll(".modal-close").forEach(btn => {
+          btn.addEventListener("click", () => {
+            document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("open"));
+          });
+        });
+
+        // Cover Color selection
+        document.querySelectorAll("#modal-cover-colors .color-dot").forEach(d => {
+          d.addEventListener("click", () => {
+            document.querySelectorAll("#modal-cover-colors .color-dot").forEach(x => x.classList.remove("active"));
+            d.classList.add("active");
+            AppState.newNotebookColor = d.getAttribute("data-color");
+          });
+        });
+
+        // Default Template selection
+        document.querySelectorAll("#modal-paper-templates .template-chip").forEach(c => {
+          c.addEventListener("click", () => {
+            document.querySelectorAll("#modal-paper-templates .template-chip").forEach(x => x.classList.remove("active"));
+            c.classList.add("active");
+            AppState.newNotebookTemplate = c.getAttribute("data-template");
+          });
+        });
+
+        // Create Button
+        document.getElementById("btn-modal-create-nb").addEventListener("click", async () => {
+          const title = document.getElementById("input-nb-title").value.trim() || "Untitled Notebook";
+          const folder = document.getElementById("select-nb-folder").value;
+          const newNb = {
+            id: "nb_" + Date.now(),
+            title: title,
+            folder: folder,
+            coverColor: AppState.newNotebookColor,
+            coverPattern: "modern",
+            defaultPaperType: AppState.newNotebookTemplate,
+            pages: [
+              {
+                pageNumber: 1,
+                paperType: AppState.newNotebookTemplate,
+                strokes: [],
+                tapes: [],
+                stickyNotes: []
+              }
+            ],
+            createdAt: Date.now(),
+            updatedAt: Date.now()
+          };
+
+          await API.saveNote(newNb);
+          document.getElementById("modal-new-notebook").classList.remove("open");
+          showToast(`Notebook '${title}' created!`);
+          openNotebook(newNb.id);
+        });
+
+        // Template select in editor header
+        document.getElementById("btn-template-select").addEventListener("click", () => {
+          document.getElementById("modal-templates").classList.add("open");
+        });
+
+        document.querySelectorAll("#editor-template-choices .template-chip").forEach(chip => {
+          chip.addEventListener("click", () => {
+            const t = chip.getAttribute("data-template");
+            if (AppState.activeNotebook) {
+              AppState.activeNotebook.pages[AppState.currentPageIndex].paperType = t;
+              renderCurrentPage();
+              autoSaveNotebook();
+            }
+            document.getElementById("modal-templates").classList.remove("open");
+            showToast(`Template changed to ${t}`);
+          });
+        });
+      }
+
+      // ==============================================================
+      // PDF IMPORT & EXPORT
+      // ==============================================================
+      function setupPdfHandling() {
+        const fileInput = document.getElementById("pdf-file-input");
+        document.getElementById("btn-import-pdf").addEventListener("click", () => {
+          fileInput.click();
+        });
+
+        fileInput.addEventListener("change", async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          showToast("Importing PDF document...");
+          try {
+            const uploadRes = await API.uploadPdf(file);
+            const nbTitle = file.name.replace(/\.[^/.]+$/, "");
+            const newNb = {
+              id: "pdf_" + Date.now(),
+              title: nbTitle,
+              folder: "PDF",
+              coverColor: "#ef4444",
+              hasPdf: true,
+              pdfPath: uploadRes.url,
+              defaultPaperType: "blank",
+              pages: [
+                { pageNumber: 1, paperType: "blank", strokes: [], tapes: [], stickyNotes: [] }
+              ],
+              createdAt: Date.now(),
+              updatedAt: Date.now()
+            };
+            await API.saveNote(newNb);
+            showToast("PDF notebook imported successfully!");
+            openNotebook(newNb.id);
+          } catch (err) {
+            showToast("Failed to upload PDF");
+          }
+        });
+
+        // Export Notebook as PDF via jsPDF
+        document.getElementById("btn-export-pdf").addEventListener("click", async () => {
+          if (!window.jspdf || !window.jspdf.jsPDF) {
+            showToast("jsPDF library loading...");
+            return;
+          }
+          showToast("Exporting multi-page PDF...");
+          const { jsPDF } = window.jspdf;
+          const doc = new jsPDF({ orientation: "portrait", unit: "px", format: [850, 1150] });
+
+          const nb = AppState.activeNotebook;
+          const originalPageIdx = AppState.currentPageIndex;
+
+          for (let i = 0; i < nb.pages.length; i++) {
+            AppState.currentPageIndex = i;
+            renderCurrentPage();
+            // Wait for canvas redraw
+            await new Promise(r => setTimeout(r, 60));
+            const imgData = AppState.canvasEngine.exportAsImage();
+            if (i > 0) doc.addPage([850, 1150], "portrait");
+            doc.addImage(imgData, "PNG", 0, 0, 850, 1150);
+          }
+
+          AppState.currentPageIndex = originalPageIdx;
+          renderCurrentPage();
+          doc.save(`${nb.title || "FlowNotes"}.pdf`);
+          showToast("PDF Export Complete!");
+        });
+      }
+
+      // ==============================================================
+      // KEYBOARD SHORTCUTS & THEME TOGGLE
+      // ==============================================================
+      function setupShortcutsAndTheme() {
+        document.getElementById("btn-toggle-theme").addEventListener("click", () => {
+          const current = document.documentElement.getAttribute("data-theme");
+          const next = current === "dark" ? "light" : "dark";
+          document.documentElement.setAttribute("data-theme", next);
+          if (AppState.canvasEngine && AppState.currentView === "editor") {
+            renderCurrentPage();
+          }
+        });
+
+        document.getElementById("input-search-notes").addEventListener("input", renderLibraryGrid);
+
+        // Folder Nav
+        document.querySelectorAll(".folder-nav .nav-item").forEach(item => {
+          item.addEventListener("click", () => {
+            document.querySelectorAll(".folder-nav .nav-item").forEach(x => x.classList.remove("active"));
+            item.classList.add("active");
+            AppState.activeFolder = item.getAttribute("data-folder");
+            document.getElementById("library-title").textContent = AppState.activeFolder;
+            renderLibraryGrid();
+          });
+        });
+
+        window.addEventListener("keydown", (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+            e.preventDefault();
+            if (AppState.canvasEngine) {
+              if (e.shiftKey) AppState.canvasEngine.redo();
+              else AppState.canvasEngine.undo();
+            }
+          }
+          if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+            e.preventDefault();
+            if (AppState.canvasEngine) AppState.canvasEngine.redo();
+          }
+          if (e.key === "Escape") {
+            closeAllDrawers();
+            document.querySelectorAll(".modal-overlay").forEach(m => m.classList.remove("open"));
+          }
+        });
+      }
+
+      // Application Entry Point
+      window.addEventListener("DOMContentLoaded", () => {
+        initIcons();
+        setupModals();
+        setupAiDrawer();
+        setupFlashcardDrawer();
+        setupPageManagerDrawer();
+        setupPdfHandling();
+        setupShortcutsAndTheme();
+        refreshLibrary();
+      });
+    })();
+  </script>
+</body>
+</html>

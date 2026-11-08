@@ -9,6 +9,7 @@ import com.flownotes.app.engine.DetectedShape
 import com.flownotes.app.engine.ShapeRecognizer
 import com.flownotes.app.engine.StrokeEngine
 import com.flownotes.app.model.*
+import com.flownotes.app.model.Point
 import java.util.*
 
 /**

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.flownotes.app">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Zero Cloud Cost / 100% Offline App Permissions -->
     <!-- Voice Memo recording synced to notebook pages -->

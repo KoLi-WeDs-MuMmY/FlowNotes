@@ -74,15 +74,15 @@ class AudioMemoManager(private val context: Context) {
                 setDataSource(file.absolutePath)
                 prepare()
                 setOnCompletionListener {
-                    isPlaying = false
+                    this@AudioMemoManager.isPlaying = false
                     onComplete()
                 }
                 start()
             }
-            isPlaying = true
+            this@AudioMemoManager.isPlaying = true
         } catch (e: Exception) {
             e.printStackTrace()
-            isPlaying = false
+            this@AudioMemoManager.isPlaying = false
         }
     }
 

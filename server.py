@@ -327,8 +327,8 @@ class FlowNotesHandler(http.server.SimpleHTTPRequestHandler):
 
 
 if __name__ == "__main__":
+    socketserver.TCPServer.allow_reuse_address = True
     server = socketserver.TCPServer((HOST, PORT), FlowNotesHandler)
-    server.allow_reuse_address = True
     print(f"FlowNotes (Freenotes Replica) server running at http://{HOST}:{PORT}/")
     try:
         server.serve_forever()

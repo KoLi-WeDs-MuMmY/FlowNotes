@@ -101,6 +101,7 @@ data class Notebook(
     var folder: String = "All Notes",
     var defaultPaperType: PaperType = PaperType.RULED,
     val pages: MutableList<Page> = mutableListOf(),
+    val flashcards: MutableList<Flashcard> = mutableListOf(),
     var pdfPath: String? = null,
     var createdAt: Long = System.currentTimeMillis(),
     var updatedAt: Long = System.currentTimeMillis()

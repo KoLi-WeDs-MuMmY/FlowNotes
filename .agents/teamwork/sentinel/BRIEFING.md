@@ -1,4 +1,4 @@
-# BRIEFING — 2026-11-08T10:08:45Z
+# BRIEFING — 2026-11-08T10:17:10Z
 
 ## Mission
 Build a 100% offline, native Android digital note-taking and PDF annotation app in Kotlin (FlowNotes) replicating core capabilities of Freenotes with zero backend, zero hosting costs, and zero external API dependencies.
@@ -20,8 +20,11 @@ Build a 100% offline, native Android digital note-taking and PDF annotation app 
 - **Delivered results**: none
 
 ## Project Status
-- **Phase**: in progress (Resumed after server restart; reviving orchestrator)
+- **Phase**: in progress (Milestone M1 Worker Execution & E2E Test Suite Development)
 - **Active Orchestrator**: `c26bb363-4e34-49ee-b305-ae12e9dfc336`
+- **Subagents Active**:
+  - `m1_worker_1` (92bcdc77): Implementing Gradle scripts, XML layouts, and Kotlin models for Milestone M1
+  - `e2e_test_writer` (4636bcc8): Delivering multi-tier test framework and test suites under `tests/`
 - **Crons**:
   - Cron 1 (Progress Report, `*/8 * * * *`): task-96
   - Cron 2 (Liveness Check, `*/10 * * * *`): task-98
@@ -34,3 +37,4 @@ Build a 100% offline, native Android digital note-taking and PDF annotation app 
 ## Artifact Index
 - /storage/emulated/0/FlowNotes/.agents/teamwork/ORIGINAL_REQUEST.md — Authoritative record of user request
 - /storage/emulated/0/FlowNotes/.agents/teamwork/PROJECT.md — Complete architectural blueprint and milestone plan
+- /storage/emulated/0/FlowNotes/tests/tier1_feature_coverage/ — Automated test modules for features F01–F16

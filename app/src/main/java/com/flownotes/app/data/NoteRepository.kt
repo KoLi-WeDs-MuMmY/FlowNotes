@@ -5,26 +5,31 @@ import com.flownotes.app.model.*
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.nio.charset.StandardCharsets
+import java.util.UUID
 
 /**
  * 100% On-Device Local Repository.
- * Saves notebooks, pages, strokes, and active recall tapes directly to device private storage.
+ * Saves notebooks, pages, strokes, active recall tapes, sticky notes, and flashcards
+ * directly to device private storage.
  * Zero server required, zero cloud cost, 100% private and persistent.
  */
-class NoteRepository(private val context: Context) {
+class NoteRepository(val baseDir: File) {
 
-    private val notebooksDir: File = File(context.filesDir, "notebooks").apply { mkdirs() }
-    val pdfsDir: File = File(context.filesDir, "pdf").apply { mkdirs() }
-    val audioDir: File = File(context.filesDir, "audio").apply { mkdirs() }
+    // Secondary constructor for Android Context integration
+    constructor(context: Context) : this(context.filesDir)
+
+    val notebooksDir: File = File(baseDir, "notebooks").apply { mkdirs() }
+    val pdfsDir: File = File(baseDir, "pdf").apply { mkdirs() }
+    val audioDir: File = File(baseDir, "audio").apply { mkdirs() }
 
     init {
         ensureDefaultNotebooks()
     }
 
     fun getAllNotebooks(): List<Notebook> {
+        if (!notebooksDir.exists()) notebooksDir.mkdirs()
         val list = mutableListOf<Notebook>()
         val files = notebooksDir.listFiles { _, name -> name.endsWith(".json") } ?: return list
 
@@ -51,12 +56,26 @@ class NoteRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Atomically saves notebook using a temporary file rename pattern.
+     * Prevents file corruption during unexpected app termination or power loss.
+     */
     fun saveNotebook(notebook: Notebook) {
         notebook.updatedAt = System.currentTimeMillis()
-        val file = File(notebooksDir, "${notebook.id}.json")
+        if (!notebooksDir.exists()) notebooksDir.mkdirs()
+
+        val targetFile = File(notebooksDir, "${notebook.id}.json")
+        val tempFile = File(notebooksDir, "${notebook.id}.tmp")
         val json = serializeNotebook(notebook)
-        FileOutputStream(file).use { out ->
+
+        FileOutputStream(tempFile).use { out ->
             out.write(json.toString(2).toByteArray(StandardCharsets.UTF_8))
+            out.fd.sync()
+        }
+
+        if (!tempFile.renameTo(targetFile)) {
+            tempFile.copyTo(targetFile, overwrite = true)
+            tempFile.delete()
         }
     }
 
@@ -66,11 +85,13 @@ class NoteRepository(private val context: Context) {
     }
 
     private fun ensureDefaultNotebooks() {
-        if (notebooksDir.listFiles()?.isEmpty() != false) {
-            // Create welcome study notebook
+        val jsonFiles = notebooksDir.listFiles { _, name -> name.endsWith(".json") }
+        if (jsonFiles.isNullOrEmpty()) {
+            // 1. Welcome study notebook (demonstrating Cornell layout & Active Recall Tape)
             val welcomeNote = Notebook(
                 title = "Welcome to FlowNotes",
                 coverColor = 0xFF3B82F6.toInt(),
+                coverPattern = "modern",
                 folder = "All Notes",
                 defaultPaperType = PaperType.CORNELL
             ).apply {
@@ -79,11 +100,11 @@ class NoteRepository(private val context: Context) {
                     TextAnnotation(
                         x = 100f,
                         y = 100f,
-                        text = "Freenotes Replica: Realistic Handwriting & Active Recall",
+                        text = "FlowNotes: Realistic Handwriting & Active Recall",
                         fontSize = 20f
                     )
                 )
-                // Add a sample active recall tape
+                // Sample active recall tape concealing key definition
                 p1.tapes.add(
                     ActiveRecallTape(
                         left = 180f,
@@ -94,16 +115,44 @@ class NoteRepository(private val context: Context) {
                         isRevealed = false
                     )
                 )
+                // Sample sticky note
+                p1.stickyNotes.add(
+                    StickyNote(
+                        x = 550f,
+                        y = 200f,
+                        width = 220f,
+                        height = 160f,
+                        content = "Tip: Tap any tape rectangle to reveal or conceal answers!",
+                        color = 0xFFFEF08A.toInt()
+                    )
+                )
                 pages.add(p1)
                 pages.add(Page(pageNumber = 2, paperType = PaperType.GRID))
                 pages.add(Page(pageNumber = 3, paperType = PaperType.PLANNER))
+
+                // Default flashcards for active recall
+                flashcards.add(
+                    Flashcard(
+                        front = "What is the primary topic of this notebook?",
+                        back = "FlowNotes — realistic handwriting & active recall study engine.",
+                        hint = "App Introduction"
+                    )
+                )
+                flashcards.add(
+                    Flashcard(
+                        front = "What is the benefit of Active Recall Tape?",
+                        back = "Conceals keywords so you can test your memory retrieval before tapping to reveal.",
+                        hint = "Memory retention"
+                    )
+                )
             }
             saveNotebook(welcomeNote)
 
-            // Create Physics & Math notebook
+            // 2. Physics & Mathematics notebook
             val scienceNote = Notebook(
                 title = "Mathematics & Physics Notes",
                 coverColor = 0xFF8B5CF6.toInt(),
+                coverPattern = "modern",
                 folder = "Study",
                 defaultPaperType = PaperType.GRID
             ).apply {
@@ -113,7 +162,7 @@ class NoteRepository(private val context: Context) {
         }
     }
 
-    private fun serializeNotebook(nb: Notebook): JSONObject {
+    fun serializeNotebook(nb: Notebook): JSONObject {
         val root = JSONObject()
         root.put("id", nb.id)
         root.put("title", nb.title)
@@ -125,6 +174,7 @@ class NoteRepository(private val context: Context) {
         root.put("createdAt", nb.createdAt)
         root.put("updatedAt", nb.updatedAt)
 
+        // Serialize Pages
         val pagesArr = JSONArray()
         for (page in nb.pages) {
             val pObj = JSONObject()
@@ -158,7 +208,7 @@ class NoteRepository(private val context: Context) {
             }
             pObj.put("strokes", strokesArr)
 
-            // Tapes
+            // Active Recall Tapes
             val tapesArr = JSONArray()
             for (tape in page.tapes) {
                 val tObj = JSONObject()
@@ -173,7 +223,7 @@ class NoteRepository(private val context: Context) {
             }
             pObj.put("tapes", tapesArr)
 
-            // Text annotations
+            // Text Annotations
             val textsArr = JSONArray()
             for (txt in page.textAnnotations) {
                 val txtObj = JSONObject()
@@ -187,17 +237,49 @@ class NoteRepository(private val context: Context) {
             }
             pObj.put("textAnnotations", textsArr)
 
+            // Sticky Notes (Preserved & serialized)
+            val stickiesArr = JSONArray()
+            for (sticky in page.stickyNotes) {
+                val stObj = JSONObject()
+                stObj.put("id", sticky.id)
+                stObj.put("x", sticky.x.toDouble())
+                stObj.put("y", sticky.y.toDouble())
+                stObj.put("width", sticky.width.toDouble())
+                stObj.put("height", sticky.height.toDouble())
+                stObj.put("content", sticky.content)
+                stObj.put("color", sticky.color)
+                stickiesArr.put(stObj)
+            }
+            pObj.put("stickyNotes", stickiesArr)
+
             pagesArr.put(pObj)
         }
         root.put("pages", pagesArr)
+
+        // Flashcards SRS serialization
+        val flashcardsArr = JSONArray()
+        for (card in nb.flashcards) {
+            val cObj = JSONObject()
+            cObj.put("id", card.id)
+            cObj.put("front", card.front)
+            cObj.put("back", card.back)
+            cObj.put("hint", card.hint)
+            cObj.put("reviewIntervalDays", card.reviewIntervalDays)
+            cObj.put("repetitions", card.repetitions)
+            cObj.put("easeFactor", card.easeFactor.toDouble())
+            flashcardsArr.put(cObj)
+        }
+        root.put("flashcards", flashcardsArr)
+
         return root
     }
 
-    private fun parseNotebookJson(json: JSONObject): Notebook {
+    fun parseNotebookJson(json: JSONObject): Notebook {
+        val nbId = json.optString("id").ifEmpty { UUID.randomUUID().toString() }
         val nb = Notebook(
-            id = json.optString("id"),
+            id = nbId,
             title = json.optString("title", "Untitled Note"),
-            coverColor = json.optInt("coverColor", 0xFF3B82F6.toInt()),
+            coverColor = parseColor(json, "coverColor", 0xFF3B82F6.toInt()),
             coverPattern = json.optString("coverPattern", "modern"),
             folder = json.optString("folder", "All Notes"),
             defaultPaperType = runCatching { PaperType.valueOf(json.optString("defaultPaperType", "RULED")) }.getOrDefault(PaperType.RULED),
@@ -206,27 +288,29 @@ class NoteRepository(private val context: Context) {
             updatedAt = json.optLong("updatedAt", System.currentTimeMillis())
         )
 
+        // Parse Pages
         val pagesArr = json.optJSONArray("pages")
         if (pagesArr != null) {
             for (i in 0 until pagesArr.length()) {
                 val pObj = pagesArr.getJSONObject(i)
+                val pId = pObj.optString("id").ifEmpty { UUID.randomUUID().toString() }
                 val page = Page(
-                    id = pObj.optString("id"),
+                    id = pId,
                     pageNumber = pObj.optInt("pageNumber", i + 1),
                     paperType = runCatching { PaperType.valueOf(pObj.optString("paperType", "RULED")) }.getOrDefault(PaperType.RULED),
                     pdfPageIndex = if (pObj.isNull("pdfPageIndex")) null else pObj.optInt("pdfPageIndex"),
                     audioMemoUri = if (pObj.isNull("audioMemoUri")) null else pObj.optString("audioMemoUri")
                 )
 
-                // parse strokes
+                // Parse strokes
                 val strokesArr = pObj.optJSONArray("strokes")
                 if (strokesArr != null) {
                     for (j in 0 until strokesArr.length()) {
                         val sObj = strokesArr.getJSONObject(j)
                         val stroke = Stroke(
-                            id = sObj.optString("id"),
+                            id = sObj.optString("id").ifEmpty { UUID.randomUUID().toString() },
                             tool = runCatching { PenTool.valueOf(sObj.optString("tool", "BALLPOINT")) }.getOrDefault(PenTool.BALLPOINT),
-                            color = sObj.optInt("color", 0xFF1E293B.toInt()),
+                            color = parseColor(sObj, "color", 0xFF1E293B.toInt()),
                             strokeWidth = sObj.optDouble("strokeWidth", 3.0).toFloat(),
                             shapeType = if (sObj.isNull("shapeType")) null else sObj.optString("shapeType")
                         )
@@ -238,8 +322,8 @@ class NoteRepository(private val context: Context) {
                                     Point(
                                         x = ptObj.optDouble("x").toFloat(),
                                         y = ptObj.optDouble("y").toFloat(),
-                                        pressure = ptObj.optDouble("p", 0.5).toFloat(),
-                                        timestamp = ptObj.optLong("t", 0L)
+                                        pressure = ptObj.optDouble("p", ptObj.optDouble("pressure", 0.5)).toFloat(),
+                                        timestamp = ptObj.optLong("t", ptObj.optLong("time", 0L))
                                     )
                                 )
                             }
@@ -248,38 +332,63 @@ class NoteRepository(private val context: Context) {
                     }
                 }
 
-                // parse tapes
+                // Parse tapes (support both left/top/right/bottom and x/y/w/h web formats)
                 val tapesArr = pObj.optJSONArray("tapes")
                 if (tapesArr != null) {
                     for (j in 0 until tapesArr.length()) {
                         val tObj = tapesArr.getJSONObject(j)
+                        val left = if (tObj.has("left")) tObj.optDouble("left").toFloat() else tObj.optDouble("x", 0.0).toFloat()
+                        val top = if (tObj.has("top")) tObj.optDouble("top").toFloat() else tObj.optDouble("y", 0.0).toFloat()
+                        val right = if (tObj.has("right")) tObj.optDouble("right").toFloat() else (left + tObj.optDouble("w", 120.0).toFloat())
+                        val bottom = if (tObj.has("bottom")) tObj.optDouble("bottom").toFloat() else (top + tObj.optDouble("h", 28.0).toFloat())
+                        val isRevealed = if (tObj.has("revealed")) tObj.optBoolean("revealed", false) else tObj.optBoolean("isRevealed", false)
+
                         page.tapes.add(
                             ActiveRecallTape(
-                                id = tObj.optString("id"),
-                                left = tObj.optDouble("left").toFloat(),
-                                top = tObj.optDouble("top").toFloat(),
-                                right = tObj.optDouble("right").toFloat(),
-                                bottom = tObj.optDouble("bottom").toFloat(),
-                                color = tObj.optInt("color", 0xFFFEF08A.toInt()),
-                                isRevealed = tObj.optBoolean("revealed", false)
+                                id = tObj.optString("id").ifEmpty { UUID.randomUUID().toString() },
+                                left = left,
+                                top = top,
+                                right = right,
+                                bottom = bottom,
+                                color = parseColor(tObj, "color", 0xFFFEF08A.toInt()),
+                                isRevealed = isRevealed
                             )
                         )
                     }
                 }
 
-                // parse text annotations
+                // Parse text annotations
                 val txtsArr = pObj.optJSONArray("textAnnotations")
                 if (txtsArr != null) {
                     for (j in 0 until txtsArr.length()) {
                         val tObj = txtsArr.getJSONObject(j)
                         page.textAnnotations.add(
                             TextAnnotation(
-                                id = tObj.optString("id"),
+                                id = tObj.optString("id").ifEmpty { UUID.randomUUID().toString() },
                                 x = tObj.optDouble("x").toFloat(),
                                 y = tObj.optDouble("y").toFloat(),
                                 text = tObj.optString("text"),
-                                color = tObj.optInt("color", 0xFF1E293B.toInt()),
+                                color = parseColor(tObj, "color", 0xFF1E293B.toInt()),
                                 fontSize = tObj.optDouble("fontSize", 16.0).toFloat()
+                            )
+                        )
+                    }
+                }
+
+                // Parse sticky notes
+                val stickiesArr = pObj.optJSONArray("stickyNotes")
+                if (stickiesArr != null) {
+                    for (j in 0 until stickiesArr.length()) {
+                        val stObj = stickiesArr.getJSONObject(j)
+                        page.stickyNotes.add(
+                            StickyNote(
+                                id = stObj.optString("id").ifEmpty { UUID.randomUUID().toString() },
+                                x = stObj.optDouble("x", 0.0).toFloat(),
+                                y = stObj.optDouble("y", 0.0).toFloat(),
+                                width = stObj.optDouble("width", 200.0).toFloat(),
+                                height = stObj.optDouble("height", 180.0).toFloat(),
+                                content = stObj.optString("content", ""),
+                                color = parseColor(stObj, "color", 0xFFFEF08A.toInt())
                             )
                         )
                     }
@@ -289,10 +398,52 @@ class NoteRepository(private val context: Context) {
             }
         }
 
+        // Parse Flashcards
+        val flashcardsArr = json.optJSONArray("flashcards")
+        if (flashcardsArr != null) {
+            for (i in 0 until flashcardsArr.length()) {
+                val cObj = flashcardsArr.getJSONObject(i)
+                nb.flashcards.add(
+                    Flashcard(
+                        id = cObj.optString("id").ifEmpty { UUID.randomUUID().toString() },
+                        front = cObj.optString("front", ""),
+                        back = cObj.optString("back", ""),
+                        hint = cObj.optString("hint", ""),
+                        reviewIntervalDays = cObj.optInt("reviewIntervalDays", 1),
+                        repetitions = cObj.optInt("repetitions", 0),
+                        easeFactor = cObj.optDouble("easeFactor", 2.5).toFloat()
+                    )
+                )
+            }
+        }
+
         if (nb.pages.isEmpty()) {
             nb.pages.add(Page(pageNumber = 1, paperType = nb.defaultPaperType))
         }
 
         return nb
+    }
+
+    private fun parseColor(obj: JSONObject, key: String, defaultColor: Int): Int {
+        if (!obj.has(key)) return defaultColor
+        val value = obj.opt(key)
+        return when (value) {
+            is Number -> value.toInt()
+            is String -> {
+                if (value.startsWith("#")) {
+                    try {
+                        val hex = value.removePrefix("#")
+                        if (hex.length == 6) {
+                            (0xFF000000 or hex.toLong(16)).toInt()
+                        } else {
+                            hex.toLong(16).toInt()
+                        }
+                    } catch (e: Exception) {
+                        defaultColor
+                    }
+                } else defaultColor
+            }
+            else -> defaultColor
+        }
     }
 }

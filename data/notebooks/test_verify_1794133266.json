@@ -1,0 +1,70 @@
+{
+  "id": "test_verify_1794133266",
+  "title": "Verification Test Notebook",
+  "folder": "Study",
+  "coverColor": "#3b82f6",
+  "defaultPaperType": "cornell",
+  "pages": [
+    {
+      "pageNumber": 1,
+      "paperType": "cornell",
+      "strokes": [
+        {
+          "id": "stroke_1",
+          "tool": "BALLPOINT",
+          "color": -14798533,
+          "strokeWidth": 3.0,
+          "points": [
+            {
+              "x": 100.0,
+              "y": 150.0,
+              "p": 0.5,
+              "t": 1000
+            },
+            {
+              "x": 105.0,
+              "y": 155.0,
+              "p": 0.7,
+              "t": 1016
+            }
+          ]
+        }
+      ],
+      "tapes": [
+        {
+          "id": "tape_1",
+          "left": 120.0,
+          "top": 200.0,
+          "right": 320.0,
+          "bottom": 240.0,
+          "color": -69494,
+          "revealed": false
+        }
+      ],
+      "stickyNotes": [
+        {
+          "id": "sticky_1",
+          "x": 400.0,
+          "y": 200.0,
+          "width": 200.0,
+          "height": 180.0,
+          "content": "Active recall study hint",
+          "color": -69494
+        }
+      ]
+    }
+  ],
+  "flashcards": [
+    {
+      "id": "card_1",
+      "front": "What is Active Recall?",
+      "back": "Testing memory retrieval during learning.",
+      "hint": "Cognitive psychology",
+      "reviewIntervalDays": 1,
+      "repetitions": 0,
+      "easeFactor": 2.5
+    }
+  ],
+  "createdAt": 1794133266069,
+  "updatedAt": 1794133266076
+}

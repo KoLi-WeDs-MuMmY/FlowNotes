@@ -13,4 +13,4 @@ captures
 __pycache__/
 *.pyc
 data/
-.agents/
+.agents/teamwork/

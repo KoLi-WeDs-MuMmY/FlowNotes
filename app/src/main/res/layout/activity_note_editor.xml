@@ -244,6 +244,28 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <!-- Floating Zoom Scale Badge Pill (Pinned to top-right of Canvas) -->
+        <TextView
+            android:id="@+id/btn_zoom_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="32dp"
+            android:minWidth="56dp"
+            android:gravity="center"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="100%"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="?attr/flownotesTextPrimary"
+            android:background="@drawable/bg_floating_dock"
+            android:elevation="6dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            app:layout_constraintTop_toBottomOf="@id/tape_action_strip"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <!-- Floating Pen Dock & Tool Palette Container -->
         <LinearLayout
             android:id="@+id/dock_wrapper"
@@ -256,91 +278,115 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Primary Pen Tools Dock (Must be LinearLayout for child iteration in NoteEditorActivity.kt) -->
+            <!-- Primary Pen Tools Dock (Capsule/Pill with 28dp corner radius) -->
             <LinearLayout
                 android:id="@+id/floating_pen_dock"
                 android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
                 android:elevation="8dp"
                 android:background="@drawable/bg_floating_dock">
 
-                <!-- Ballpoint Tool -->
-                <TextView
+                <!-- 1. Ballpoint Pen -->
+                <ImageView
                     android:id="@+id/tool_ballpoint"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="🖊️"
-                    android:textSize="20sp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_ballpoint"
+                    android:tint="?attr/flownotesTextPrimary"
                     android:background="@drawable/bg_tool_button"
                     android:layout_marginEnd="6dp"
                     android:contentDescription="Ballpoint Pen" />
 
-                <!-- Fountain Pen Tool -->
-                <TextView
+                <!-- 2. Fountain Pen -->
+                <ImageView
                     android:id="@+id/tool_fountain"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="✒️"
-                    android:textSize="20sp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_fountain"
+                    android:tint="?attr/flownotesTextPrimary"
                     android:background="@drawable/bg_tool_button"
                     android:layout_marginEnd="6dp"
                     android:contentDescription="Fountain Pen" />
 
-                <!-- Highlighter Tool -->
-                <TextView
+                <!-- 3. Highlighter -->
+                <ImageView
                     android:id="@+id/tool_highlighter"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="🖍️"
-                    android:textSize="20sp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_highlighter"
+                    android:tint="?attr/flownotesTextPrimary"
                     android:background="@drawable/bg_tool_button"
                     android:layout_marginEnd="6dp"
                     android:contentDescription="Highlighter" />
 
-                <!-- Stroke Eraser Tool -->
-                <TextView
-                    android:id="@+id/tool_eraser"
+                <!-- 4. Pencil -->
+                <ImageView
+                    android:id="@+id/tool_pencil"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="🧹"
-                    android:textSize="20sp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_pencil"
+                    android:tint="?attr/flownotesTextPrimary"
                     android:background="@drawable/bg_tool_button"
                     android:layout_marginEnd="6dp"
-                    android:contentDescription="Eraser" />
+                    android:contentDescription="Pencil" />
 
-                <!-- Active Recall Tape Tool -->
-                <TextView
+                <!-- 5. Geometric Shape Recognizer -->
+                <ImageView
+                    android:id="@+id/tool_shape"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_shape"
+                    android:tint="?attr/flownotesTextPrimary"
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Shape Recognizer" />
+
+                <!-- 6. Active Recall Tape -->
+                <ImageView
                     android:id="@+id/tool_tape"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="🏷️"
-                    android:textSize="20sp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_tape"
+                    android:tint="?attr/flownotesTextPrimary"
                     android:background="@drawable/bg_tool_button"
                     android:layout_marginEnd="6dp"
                     android:contentDescription="Active Recall Tape" />
 
-                <!-- Geometric Shape Recognizer Tool -->
-                <TextView
-                    android:id="@+id/tool_shape"
+                <!-- 7. Stroke Eraser -->
+                <ImageView
+                    android:id="@+id/tool_eraser"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:gravity="center"
-                    android:text="📐"
-                    android:textSize="20sp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_eraser"
+                    android:tint="?attr/flownotesTextPrimary"
                     android:background="@drawable/bg_tool_button"
-                    android:contentDescription="Geometric Shape Snapping" />
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Eraser" />
+
+                <!-- 8. Selection Lasso -->
+                <ImageView
+                    android:id="@+id/tool_lasso"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_tool_lasso"
+                    android:tint="?attr/flownotesTextPrimary"
+                    android:background="@drawable/bg_tool_button"
+                    android:contentDescription="Selection Lasso" />
             </LinearLayout>
 
-            <!-- Secondary Dock: Color & Stroke Width Presets -->
+            <!-- Secondary Dock: Curated Classic Ink Palette & Stroke Widths -->
             <LinearLayout
                 android:id="@+id/secondary_palette"
                 android:layout_width="wrap_content"
@@ -353,55 +399,69 @@
                 android:elevation="6dp"
                 android:background="@drawable/bg_floating_dock">
 
-                <!-- Color Swatches -->
+                <!-- Curated Classic Colors: Jet Black, Royal Blue, Forest Green, Crimson Red, Sepia, Lavender, Warm Ochre -->
                 <View
                     android:id="@+id/color_black"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:background="#1E293B"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_black"
+                    android:layout_marginEnd="7dp"
+                    android:contentDescription="Jet Black" />
 
                 <View
                     android:id="@+id/color_blue"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:background="#3B82F6"
-                    android:layout_marginEnd="8dp" />
-
-                <View
-                    android:id="@+id/color_purple"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:background="#8B5CF6"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_blue"
+                    android:layout_marginEnd="7dp"
+                    android:contentDescription="Royal Blue" />
 
                 <View
                     android:id="@+id/color_green"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:background="#10B981"
-                    android:layout_marginEnd="8dp" />
-
-                <View
-                    android:id="@+id/color_orange"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:background="#F59E0B"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_green"
+                    android:layout_marginEnd="7dp"
+                    android:contentDescription="Forest Green" />
 
                 <View
                     android:id="@+id/color_red"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:background="#EF4444"
-                    android:layout_marginEnd="12dp" />
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_red"
+                    android:layout_marginEnd="7dp"
+                    android:contentDescription="Crimson Red" />
+
+                <View
+                    android:id="@+id/color_sepia"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_sepia"
+                    android:layout_marginEnd="7dp"
+                    android:contentDescription="Sepia" />
+
+                <View
+                    android:id="@+id/color_lavender"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_lavender"
+                    android:layout_marginEnd="7dp"
+                    android:contentDescription="Lavender" />
+
+                <View
+                    android:id="@+id/color_ochre"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/bg_swatch_ochre"
+                    android:layout_marginEnd="10dp"
+                    android:contentDescription="Warm Ochre" />
 
                 <!-- Palette Divider -->
                 <View
                     android:layout_width="1dp"
                     android:layout_height="20dp"
                     android:background="@color/border_color"
-                    android:layout_marginEnd="12dp" />
+                    android:layout_marginEnd="10dp" />
 
                 <!-- Stroke Width Selectors -->
                 <TextView
@@ -413,7 +473,8 @@
                     android:textColor="@color/text_primary"
                     android:textSize="22sp"
                     android:background="@drawable/bg_tool_button"
-                    android:layout_marginEnd="6dp" />
+                    android:layout_marginEnd="5dp"
+                    android:contentDescription="Fine Stroke" />
 
                 <TextView
                     android:id="@+id/size_medium"
@@ -424,7 +485,8 @@
                     android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:background="@drawable/bg_tool_button"
-                    android:layout_marginEnd="6dp" />
+                    android:layout_marginEnd="5dp"
+                    android:contentDescription="Medium Stroke" />
 
                 <TextView
                     android:id="@+id/size_bold"
@@ -434,7 +496,20 @@
                     android:text="⬤"
                     android:textColor="@color/text_primary"
                     android:textSize="22sp"
-                    android:background="@drawable/bg_tool_button" />
+                    android:background="@drawable/bg_tool_button"
+                    android:layout_marginEnd="6dp"
+                    android:contentDescription="Bold Stroke" />
+
+                <!-- Dedicated Stroke Width Popover Anchor -->
+                <ImageView
+                    android:id="@+id/btn_stroke_width_anchor"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_edit"
+                    android:tint="?attr/flownotesTextPrimary"
+                    android:background="@drawable/bg_tool_button"
+                    android:contentDescription="Custom Stroke Width" />
             </LinearLayout>
 
         </LinearLayout>

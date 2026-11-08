@@ -13,6 +13,7 @@ import com.flownotes.app.ai.LocalAiStudyEngine
 import com.flownotes.app.audio.AudioMemoManager
 import com.flownotes.app.data.NoteRepository
 import com.flownotes.app.model.*
+import com.flownotes.app.model.Point
 import com.flownotes.app.pdf.PdfAnnotationManager
 import com.flownotes.app.view.CanvasView
 import com.flownotes.app.util.ThemeManager
@@ -107,36 +108,50 @@ class NoteEditorActivity : AppCompatActivity() {
             openFlashcardStudy()
         }
 
-        // Floating Pen Dock Tools
-        findViewById<View>(R.id.tool_ballpoint).setOnClickListener { selectTool(PenTool.BALLPOINT, it) }
-        findViewById<View>(R.id.tool_fountain).setOnClickListener { selectTool(PenTool.FOUNTAIN, it) }
-        findViewById<View>(R.id.tool_highlighter).setOnClickListener { selectTool(PenTool.HIGHLIGHTER, it) }
-        findViewById<View>(R.id.tool_eraser).setOnClickListener { selectTool(PenTool.ERASER_STROKE, it) }
-        findViewById<View>(R.id.tool_tape).setOnClickListener { selectTool(PenTool.TAPE, it) }
-        findViewById<View>(R.id.tool_shape).setOnClickListener { selectTool(PenTool.SHAPE, it) }
+        // Floating Pen Dock Tools (8 Tools)
+        findViewById<View>(R.id.tool_ballpoint)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.BALLPOINT, it) }
+        findViewById<View>(R.id.tool_fountain)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.FOUNTAIN, it) }
+        findViewById<View>(R.id.tool_highlighter)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.HIGHLIGHTER, it) }
+        findViewById<View>(R.id.tool_pencil)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.PENCIL, it) }
+        findViewById<View>(R.id.tool_shape)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.SHAPE, it) }
+        findViewById<View>(R.id.tool_tape)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.TAPE, it) }
+        findViewById<View>(R.id.tool_eraser)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.ERASER_STROKE, it) }
+        findViewById<View>(R.id.tool_lasso)?.setOnClickListener { this@NoteEditorActivity.selectTool(PenTool.LASSO, it) }
 
         // Tape Reveal / Conceal Quick Actions
-        findViewById<View>(R.id.btn_reveal_tapes).setOnClickListener {
-            canvasView.toggleAllTapes(reveal = true)
-            Toast.makeText(this, "All Tapes Revealed", Toast.LENGTH_SHORT).show()
+        findViewById<View>(R.id.btn_reveal_tapes)?.setOnClickListener {
+            this@NoteEditorActivity.canvasView.toggleAllTapes(reveal = true)
+            Toast.makeText(this@NoteEditorActivity, "All Tapes Revealed", Toast.LENGTH_SHORT).show()
         }
-        findViewById<View>(R.id.btn_conceal_tapes).setOnClickListener {
-            canvasView.toggleAllTapes(reveal = false)
-            Toast.makeText(this, "All Tapes Concealed (Study Mode)", Toast.LENGTH_SHORT).show()
+        findViewById<View>(R.id.btn_conceal_tapes)?.setOnClickListener {
+            this@NoteEditorActivity.canvasView.toggleAllTapes(reveal = false)
+            Toast.makeText(this@NoteEditorActivity, "All Tapes Concealed (Study Mode)", Toast.LENGTH_SHORT).show()
         }
 
-        // Color Presets
-        findViewById<View>(R.id.color_black).setOnClickListener { canvasView.currentColor = Color.parseColor("#1E293B") }
-        findViewById<View>(R.id.color_blue).setOnClickListener { canvasView.currentColor = Color.parseColor("#3B82F6") }
-        findViewById<View>(R.id.color_purple).setOnClickListener { canvasView.currentColor = Color.parseColor("#8B5CF6") }
-        findViewById<View>(R.id.color_green).setOnClickListener { canvasView.currentColor = Color.parseColor("#10B981") }
-        findViewById<View>(R.id.color_orange).setOnClickListener { canvasView.currentColor = Color.parseColor("#F59E0B") }
-        findViewById<View>(R.id.color_red).setOnClickListener { canvasView.currentColor = Color.parseColor("#EF4444") }
+        // Curated Classic Ink Palette (7 Colors)
+        findViewById<View>(R.id.color_black)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#0A0A0A") }
+        findViewById<View>(R.id.color_blue)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#1D4ED8") }
+        findViewById<View>(R.id.color_green)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#15803D") }
+        findViewById<View>(R.id.color_red)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#B91C1C") }
+        findViewById<View>(R.id.color_sepia)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#78350F") }
+        findViewById<View>(R.id.color_lavender)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#7E22CE") }
+        findViewById<View>(R.id.color_ochre)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentColor = Color.parseColor("#C2410C") }
 
-        // Stroke Width Presets
-        findViewById<View>(R.id.size_fine).setOnClickListener { canvasView.currentStrokeWidth = 3.0f }
-        findViewById<View>(R.id.size_medium).setOnClickListener { canvasView.currentStrokeWidth = 6.0f }
-        findViewById<View>(R.id.size_bold).setOnClickListener { canvasView.currentStrokeWidth = 12.0f }
+        // Stroke Width Presets & Custom Width Popover Anchor
+        findViewById<View>(R.id.size_fine)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentStrokeWidth = 3.0f }
+        findViewById<View>(R.id.size_medium)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentStrokeWidth = 6.0f }
+        findViewById<View>(R.id.size_bold)?.setOnClickListener { this@NoteEditorActivity.canvasView.currentStrokeWidth = 12.0f }
+        findViewById<View>(R.id.btn_stroke_width_anchor)?.setOnClickListener { this@NoteEditorActivity.showStrokeWidthPopover() }
+
+        // Floating Zoom Scale Badge Pill
+        val btnZoomBadge = findViewById<TextView>(R.id.btn_zoom_badge)
+        btnZoomBadge?.setOnClickListener {
+            this@NoteEditorActivity.canvasView.resetZoomAndPan(animated = true)
+        }
+        this@NoteEditorActivity.canvasView.onScaleChangedListener = { scale ->
+            val pct = (scale * 100).toInt()
+            btnZoomBadge?.text = "$pct%"
+        }
 
         // Setup On-Device AI Drawer
         setupLocalAiDrawer()
@@ -279,6 +294,43 @@ class NoteEditorActivity : AppCompatActivity() {
                 Toast.makeText(this, "Inserted into note", Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private fun showStrokeWidthPopover() {
+        val dialogView = LinearLayout(this@NoteEditorActivity).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(48, 36, 48, 36)
+        }
+
+        val tvLabel = TextView(this@NoteEditorActivity).apply {
+            text = "Stroke Width: ${this@NoteEditorActivity.canvasView.currentStrokeWidth.toInt()} dp"
+            textSize = 15f
+            setTextColor(Color.parseColor("#0F172A"))
+            setPadding(0, 0, 0, 16)
+        }
+
+        val seekBar = SeekBar(this@NoteEditorActivity).apply {
+            max = 30
+            progress = this@NoteEditorActivity.canvasView.currentStrokeWidth.toInt().coerceIn(1, 30)
+            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
+                    val w = progress.coerceAtLeast(1).toFloat()
+                    tvLabel.text = "Stroke Width: ${w.toInt()} dp"
+                    this@NoteEditorActivity.canvasView.currentStrokeWidth = w
+                }
+                override fun onStartTrackingTouch(sb: SeekBar?) {}
+                override fun onStopTrackingTouch(sb: SeekBar?) {}
+            })
+        }
+
+        dialogView.addView(tvLabel)
+        dialogView.addView(seekBar)
+
+        AlertDialog.Builder(this@NoteEditorActivity)
+            .setTitle("Select Stroke Width")
+            .setView(dialogView)
+            .setPositiveButton("Done", null)
+            .show()
     }
 
     private fun saveAndExit() {

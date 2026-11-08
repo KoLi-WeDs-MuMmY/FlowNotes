@@ -41,7 +41,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="8dp"
                     android:contentDescription="Back"
-                    android:src="@android:drawable/ic_menu_revert"
+                    android:src="@drawable/ic_arrow_back"
                     app:tint="@color/text_primary" />
 
                 <!-- Notebook Title (Click to rename) -->
@@ -67,7 +67,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
                     android:contentDescription="Previous Page"
-                    android:src="@android:drawable/ic_media_previous"
+                    android:src="@drawable/ic_chevron_left"
                     app:tint="@color/text_secondary" />
 
                 <TextView
@@ -87,7 +87,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
                     android:contentDescription="Next Page"
-                    android:src="@android:drawable/ic_media_next"
+                    android:src="@drawable/ic_chevron_right"
                     app:tint="@color/text_secondary" />
 
                 <ImageView
@@ -97,7 +97,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
                     android:contentDescription="Add Page"
-                    android:src="@android:drawable/ic_input_add"
+                    android:src="@drawable/ic_add"
                     app:tint="@color/primary"
                     android:layout_marginEnd="12dp" />
 
@@ -116,7 +116,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
                     android:contentDescription="Undo"
-                    android:src="@android:drawable/ic_menu_revert"
+                    android:src="@drawable/ic_undo"
                     app:tint="@color/text_primary" />
 
                 <ImageView
@@ -126,7 +126,7 @@
                     android:background="?android:attr/selectableItemBackgroundBorderless"
                     android:padding="6dp"
                     android:contentDescription="Redo"
-                    android:src="@android:drawable/ic_menu_forward"
+                    android:src="@drawable/ic_redo"
                     app:tint="@color/text_primary"
                     android:layout_marginEnd="12dp" />
 

@@ -224,6 +224,6 @@
         android:contentDescription="@string/create_notebook"
         app:backgroundTint="@color/primary"
         app:tint="@android:color/white"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:srcCompat="@drawable/ic_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

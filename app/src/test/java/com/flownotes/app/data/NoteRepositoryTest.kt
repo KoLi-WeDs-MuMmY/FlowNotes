@@ -23,7 +23,13 @@ class NoteRepositoryTest {
 
     @Before
     fun setUp() {
-        testDir = File(System.getProperty("java.io.tmpdir"), "flownotes_repo_test_${UUID.randomUUID()}").apply {
+        val candidates = listOf(
+            File(System.getProperty("java.io.tmpdir") ?: "/tmp"),
+            File("/data/user/0/com.agy/files/usr/tmp"),
+            File("build/test_tmp")
+        )
+        val valid = candidates.firstOrNull { runCatching { it.mkdirs(); it.canWrite() }.getOrDefault(false) } ?: File("build/test_tmp")
+        testDir = File(valid, "flownotes_repo_test_${UUID.randomUUID()}").apply {
             mkdirs()
         }
         repository = NoteRepository(testDir)

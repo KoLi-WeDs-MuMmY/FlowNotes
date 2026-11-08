@@ -12,7 +12,15 @@ import java.io.File
  */
 class ModelSerializationTest {
 
-    private val tempDir = File(System.getProperty("java.io.tmpdir"), "flownotes_model_test").apply { mkdirs() }
+    private val tempDir: File = run {
+        val candidates = listOf(
+            File(System.getProperty("java.io.tmpdir") ?: "/tmp"),
+            File("/data/user/0/com.agy/files/usr/tmp"),
+            File("build/test_tmp")
+        )
+        val valid = candidates.firstOrNull { runCatching { it.mkdirs(); it.canWrite() }.getOrDefault(false) } ?: File("build/test_tmp")
+        File(valid, "flownotes_model_test").apply { mkdirs() }
+    }
     private val repository = NoteRepository(tempDir)
 
     @Test

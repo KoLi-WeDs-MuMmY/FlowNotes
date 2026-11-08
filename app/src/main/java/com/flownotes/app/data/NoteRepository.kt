@@ -428,6 +428,7 @@ class NoteRepository(val baseDir: File) {
         if (!obj.has(key)) return defaultColor
         val value = obj.opt(key)
         return when (value) {
+            null -> defaultColor
             is Number -> value.toInt()
             is String -> {
                 if (value.startsWith("#")) {

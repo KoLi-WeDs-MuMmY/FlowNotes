@@ -184,14 +184,19 @@ object ShapeRecognizer {
         }
 
         // 5. Rectangle and Rounded Rectangle Check (Evaluated BEFORE Ellipse)
-        val rectBounds = RectF(minX, minY, maxX, maxY)
         val minDim = min(width, height)
-        val avgEdgeDist = computeAverageEdgeDistance(points, rectBounds)
+        val avgEdgeDist = computeAverageEdgeDistance(points, minX, minY, maxX, maxY)
 
         if (avgEdgeDist <= max(6f, minDim * 0.05f)) {
-            val cornerOffsets = computeCornerOffsets(points, rectBounds)
+            val cornerOffsets = computeCornerOffsets(points, minX, minY, maxX, maxY)
             val maxCornerDist = maxOf(cornerOffsets.tl, cornerOffsets.tr, cornerOffsets.br, cornerOffsets.bl)
             if (maxCornerDist <= minDim * 0.45f) {
+                val rectBounds = RectF(minX, minY, maxX, maxY).apply {
+                    left = minX
+                    top = minY
+                    right = maxX
+                    bottom = maxY
+                }
                 val avgCornerOffset = cornerOffsets.average
                 if (avgCornerOffset in 8f..(minDim * 0.38f)) {
                     val cornerRadius = (avgCornerOffset * 2.414f).coerceIn(8f, minDim * 0.40f)
@@ -517,27 +522,39 @@ object ShapeRecognizer {
         val average: Float
     )
 
-    private fun computeCornerOffsets(points: List<Point>, bounds: RectF): CornerOffsets {
+    private fun computeCornerOffsets(
+        points: List<Point>,
+        left: Float,
+        top: Float,
+        right: Float,
+        bottom: Float
+    ): CornerOffsets {
         var minTL = Float.MAX_VALUE
         var minTR = Float.MAX_VALUE
         var minBR = Float.MAX_VALUE
         var minBL = Float.MAX_VALUE
 
         for (p in points) {
-            minTL = min(minTL, hypot(p.x - bounds.left, p.y - bounds.top))
-            minTR = min(minTR, hypot(p.x - bounds.right, p.y - bounds.top))
-            minBR = min(minBR, hypot(p.x - bounds.right, p.y - bounds.bottom))
-            minBL = min(minBL, hypot(p.x - bounds.left, p.y - bounds.bottom))
+            minTL = min(minTL, hypot(p.x - left, p.y - top))
+            minTR = min(minTR, hypot(p.x - right, p.y - top))
+            minBR = min(minBR, hypot(p.x - right, p.y - bottom))
+            minBL = min(minBL, hypot(p.x - left, p.y - bottom))
         }
         val avg = (minTL + minTR + minBR + minBL) / 4f
         return CornerOffsets(minTL, minTR, minBR, minBL, avg)
     }
 
-    private fun computeAverageEdgeDistance(points: List<Point>, bounds: RectF): Float {
+    private fun computeAverageEdgeDistance(
+        points: List<Point>,
+        left: Float,
+        top: Float,
+        right: Float,
+        bottom: Float
+    ): Float {
         var sumDist = 0.0
         for (p in points) {
-            val dx = min(abs(p.x - bounds.left), abs(p.x - bounds.right))
-            val dy = min(abs(p.y - bounds.top), abs(p.y - bounds.bottom))
+            val dx = min(abs(p.x - left), abs(p.x - right))
+            val dy = min(abs(p.y - top), abs(p.y - bottom))
             sumDist += min(dx, dy)
         }
         return (sumDist / points.size).toFloat()

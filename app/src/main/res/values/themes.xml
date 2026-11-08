@@ -1,11 +1,88 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.FlowNotes" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+
+    <!-- Base Theme -->
+    <style name="Theme.FlowNotes" parent="Theme.FlowNotes.Light" />
+
+    <!-- 1. LIGHT THEME (Warm Paper / Slate Editorial) -->
+    <style name="Theme.FlowNotes.Light" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
-        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorSecondary">@color/accent</item>
-        <item name="android:statusBarColor">@color/bg_surface</item>
+        <item name="android:windowBackground">@color/light_surface_base</item>
+        <item name="android:statusBarColor">@color/light_surface_base</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:navigationBarColor">@color/light_surface_base</item>
+        <item name="android:windowLightNavigationBar">true</item>
+
+        <!-- Semantic Attributes -->
+        <item name="flownotesSurfaceBase">@color/light_surface_base</item>
+        <item name="flownotesSurfaceCard">@color/light_surface_card</item>
+        <item name="flownotesSurfaceElevated">@color/light_surface_elevated</item>
+        <item name="flownotesTextPrimary">@color/light_text_primary</item>
+        <item name="flownotesTextSecondary">@color/light_text_secondary</item>
+        <item name="flownotesBorder">@color/light_border</item>
+        <item name="flownotesChipBg">@color/light_surface_elevated</item>
+        <item name="flownotesChipSelectedBg">@color/light_text_primary</item>
+        <item name="flownotesChipText">@color/light_text_secondary</item>
+        <item name="flownotesChipSelectedText">#FFFFFF</item>
+        <item name="flownotesDockBg">@color/light_dock_bg</item>
+        <item name="flownotesSpineOverlay">#30000000</item>
     </style>
+
+    <!-- 2. DARK THEME (Slate Charcoal) -->
+    <style name="Theme.FlowNotes.Dark" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">#60A5FA</item>
+        <item name="colorPrimaryVariant">#3B82F6</item>
+        <item name="colorOnPrimary">#0F172A</item>
+        <item name="colorSecondary">#A78BFA</item>
+        <item name="android:windowBackground">@color/dark_surface_base</item>
+        <item name="android:statusBarColor">@color/dark_surface_base</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/dark_surface_base</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- Semantic Attributes -->
+        <item name="flownotesSurfaceBase">@color/dark_surface_base</item>
+        <item name="flownotesSurfaceCard">@color/dark_surface_card</item>
+        <item name="flownotesSurfaceElevated">@color/dark_surface_elevated</item>
+        <item name="flownotesTextPrimary">@color/dark_text_primary</item>
+        <item name="flownotesTextSecondary">@color/dark_text_secondary</item>
+        <item name="flownotesBorder">@color/dark_border</item>
+        <item name="flownotesChipBg">@color/dark_surface_elevated</item>
+        <item name="flownotesChipSelectedBg">#60A5FA</item>
+        <item name="flownotesChipText">@color/dark_text_secondary</item>
+        <item name="flownotesChipSelectedText">#0F172A</item>
+        <item name="flownotesDockBg">@color/dark_dock_bg</item>
+        <item name="flownotesSpineOverlay">#40000000</item>
+    </style>
+
+    <!-- 3. AMOLED BLACK THEME (Pitch Black #000000) -->
+    <style name="Theme.FlowNotes.Amoled" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">#38BDF8</item>
+        <item name="colorPrimaryVariant">#0284C7</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorSecondary">#C084FC</item>
+        <item name="android:windowBackground">@color/amoled_surface_base</item>
+        <item name="android:statusBarColor">@color/amoled_surface_base</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:navigationBarColor">@color/amoled_surface_base</item>
+        <item name="android:windowLightNavigationBar">false</item>
+
+        <!-- Semantic Attributes -->
+        <item name="flownotesSurfaceBase">@color/amoled_surface_base</item>
+        <item name="flownotesSurfaceCard">@color/amoled_surface_card</item>
+        <item name="flownotesSurfaceElevated">@color/amoled_surface_elevated</item>
+        <item name="flownotesTextPrimary">@color/amoled_text_primary</item>
+        <item name="flownotesTextSecondary">@color/amoled_text_secondary</item>
+        <item name="flownotesBorder">@color/amoled_border</item>
+        <item name="flownotesChipBg">@color/amoled_surface_elevated</item>
+        <item name="flownotesChipSelectedBg">#38BDF8</item>
+        <item name="flownotesChipText">@color/amoled_text_secondary</item>
+        <item name="flownotesChipSelectedText">#000000</item>
+        <item name="flownotesDockBg">@color/amoled_dock_bg</item>
+        <item name="flownotesSpineOverlay">#60000000</item>
+    </style>
+
 </resources>

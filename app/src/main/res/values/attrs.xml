@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- FlowNotes Semantic Theme Attributes -->
+    <attr name="flownotesSurfaceBase" format="color" />
+    <attr name="flownotesSurfaceCard" format="color" />
+    <attr name="flownotesSurfaceElevated" format="color" />
+    <attr name="flownotesTextPrimary" format="color" />
+    <attr name="flownotesTextSecondary" format="color" />
+    <attr name="flownotesBorder" format="color" />
+    <attr name="flownotesChipBg" format="color" />
+    <attr name="flownotesChipSelectedBg" format="color" />
+    <attr name="flownotesChipText" format="color" />
+    <attr name="flownotesChipSelectedText" format="color" />
+    <attr name="flownotesDockBg" format="color" />
+    <attr name="flownotesSpineOverlay" format="color" />
+</resources>

@@ -5,13 +5,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_app">
+    android:background="?attr/flownotesSurfaceBase">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Top App Bar / Brand Header -->
+        <!-- Minimalist Top App Bar / Brand Header -->
         <LinearLayout
             android:id="@+id/header_container"
             android:layout_width="match_parent"
@@ -19,10 +19,10 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingStart="20dp"
-            android:paddingEnd="20dp"
+            android:paddingEnd="16dp"
             android:paddingTop="16dp"
             android:paddingBottom="12dp"
-            android:background="@color/bg_surface"
+            android:background="?attr/flownotesSurfaceBase"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
@@ -38,60 +38,99 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/app_name"
-                    android:textColor="@color/text_primary"
+                    android:textColor="?attr/flownotesTextPrimary"
                     android:textSize="26sp"
                     android:textStyle="bold"
-                    android:fontFamily="sans-serif-medium" />
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="-0.02" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="100% Offline Digital Notebooks &amp; Active Recall"
-                    android:textColor="@color/text_secondary"
+                    android:text="100% Offline Notes &amp; Active Recall"
+                    android:textColor="?attr/flownotesTextSecondary"
                     android:textSize="12sp"
-                    android:layout_marginTop="2dp" />
+                    android:layout_marginTop="1dp" />
             </LinearLayout>
 
-            <!-- Import PDF Button -->
+            <!-- Theme Toggle Button -->
+            <ImageView
+                android:id="@+id/btn_theme"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:padding="8dp"
+                android:contentDescription="Switch Theme"
+                android:src="@drawable/ic_theme"
+                app:tint="?attr/flownotesTextPrimary"
+                android:layout_marginEnd="8dp" />
+
+            <!-- Import PDF Pill Button -->
             <Button
                 android:id="@+id/btn_import_pdf"
                 android:layout_width="wrap_content"
-                android:layout_height="42dp"
+                android:layout_height="40dp"
                 android:text="@string/import_pdf"
                 android:textSize="13sp"
+                android:textStyle="bold"
                 android:textAllCaps="false"
                 android:textColor="@android:color/white"
-                android:backgroundTint="@color/primary"
-                android:paddingStart="14dp"
-                android:paddingEnd="14dp" />
+                android:background="@drawable/bg_pill_button"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp" />
         </LinearLayout>
 
-        <!-- Search Bar -->
-        <androidx.cardview.widget.CardView
+        <!-- Search Bar Pill (24dp Corner Radius) -->
+        <LinearLayout
             android:id="@+id/card_search"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="16dp"
-            android:layout_marginTop="12dp"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="2dp"
-            app:cardBackgroundColor="@color/bg_surface"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="12dp"
+            android:background="@drawable/bg_search_pill"
             app:layout_constraintTop_toBottomOf="@id/header_container"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <SearchView
-                android:id="@+id/search_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:iconifiedByDefault="false"
-                android:queryHint="@string/search_hint"
-                android:queryBackground="@android:color/transparent"
-                android:searchIcon="@null" />
-        </androidx.cardview.widget.CardView>
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:src="@drawable/ic_search"
+                app:tint="?attr/flownotesTextSecondary"
+                android:contentDescription="Search Icon" />
 
-        <!-- Folder Filter Chips -->
+            <EditText
+                android:id="@+id/et_search"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:background="@android:color/transparent"
+                android:hint="@string/search_hint"
+                android:textColor="?attr/flownotesTextPrimary"
+                android:textColorHint="?attr/flownotesTextSecondary"
+                android:textSize="14sp"
+                android:singleLine="true"
+                android:imeOptions="actionSearch" />
+
+            <ImageView
+                android:id="@+id/btn_clear_search"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:padding="6dp"
+                android:src="@drawable/ic_close"
+                app:tint="?attr/flownotesTextSecondary"
+                android:visibility="gone"
+                android:contentDescription="Clear Search" />
+        </LinearLayout>
+
+        <!-- Quick Filter Chips Scroll View -->
         <HorizontalScrollView
             android:id="@+id/scroll_folders"
             android:layout_width="match_parent"
@@ -106,65 +145,134 @@
             app:layout_constraintEnd_toEndOf="parent">
 
             <LinearLayout
+                android:id="@+id/chips_container"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
+                <!-- All Notes -->
                 <TextView
-                    android:id="@+id/btn_folder_all"
+                    android:id="@+id/chip_all"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="34dp"
                     android:gravity="center"
-                    android:text="@string/all_notes"
-                    android:textColor="@color/primary"
-                    android:textSize="14sp"
+                    android:text="All Notes"
+                    android:textColor="?attr/flownotesChipSelectedText"
+                    android:textSize="13sp"
                     android:textStyle="bold"
-                    android:background="@drawable/bg_folder_chip"
+                    android:background="@drawable/bg_filter_chip_selected"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:layout_marginEnd="8dp"
                     android:clickable="true"
                     android:focusable="true" />
 
+                <!-- Recent -->
                 <TextView
-                    android:id="@+id/btn_folder_study"
+                    android:id="@+id/chip_recent"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="34dp"
                     android:gravity="center"
-                    android:text="@string/study"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:background="@drawable/bg_folder_chip"
+                    android:text="Recent"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:layout_marginEnd="8dp"
                     android:clickable="true"
                     android:focusable="true" />
 
+                <!-- Favorites -->
                 <TextView
-                    android:id="@+id/btn_folder_work"
+                    android:id="@+id/chip_favorites"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="34dp"
                     android:gravity="center"
-                    android:text="@string/work"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:background="@drawable/bg_folder_chip"
+                    android:text="★ Favorites"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:layout_marginEnd="8dp"
                     android:clickable="true"
                     android:focusable="true" />
 
+                <!-- PDF Documents -->
                 <TextView
-                    android:id="@+id/btn_folder_personal"
+                    android:id="@+id/chip_pdfs"
                     android:layout_width="wrap_content"
-                    android:layout_height="36dp"
+                    android:layout_height="34dp"
                     android:gravity="center"
-                    android:text="@string/personal"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:background="@drawable/bg_folder_chip"
+                    android:text="PDF Docs"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Flashcards -->
+                <TextView
+                    android:id="@+id/chip_flashcards"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:text="Flashcards"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Study -->
+                <TextView
+                    android:id="@+id/chip_folder_study"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:text="Study"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Work -->
+                <TextView
+                    android:id="@+id/chip_folder_work"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:text="Work"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:layout_marginEnd="8dp"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+                <!-- Personal -->
+                <TextView
+                    android:id="@+id/chip_folder_personal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="34dp"
+                    android:gravity="center"
+                    android:text="Personal"
+                    android:textColor="?attr/flownotesChipText"
+                    android:textSize="13sp"
+                    android:background="@drawable/bg_filter_chip"
                     android:paddingStart="16dp"
                     android:paddingEnd="16dp"
                     android:clickable="true"
@@ -172,7 +280,7 @@
             </LinearLayout>
         </HorizontalScrollView>
 
-        <!-- Current Active Folder Title -->
+        <!-- Current Filter Title Row -->
         <LinearLayout
             android:id="@+id/title_row"
             android:layout_width="match_parent"
@@ -181,19 +289,28 @@
             android:gravity="center_vertical"
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="14dp"
             app:layout_constraintTop_toBottomOf="@id/scroll_folders"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/tv_folder_title"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="All Notes"
-                android:textColor="@color/text_primary"
+                android:textColor="?attr/flownotesTextPrimary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_notebook_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/flownotesTextSecondary"
+                android:textSize="13sp"
+                tools:text="3 notebooks" />
         </LinearLayout>
 
         <!-- Notebooks Grid Recycler View -->
@@ -202,9 +319,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_marginTop="8dp"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="80dp"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="84dp"
             android:clipToPadding="false"
             app:layout_constraintTop_toBottomOf="@id/title_row"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -212,9 +329,66 @@
             app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@layout/item_notebook_card" />
 
+        <!-- Clean Empty State Container -->
+        <LinearLayout
+            android:id="@+id/layout_empty_state"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/title_row"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <ImageView
+                android:id="@+id/iv_empty_icon"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:src="@drawable/ic_empty_notebooks"
+                android:contentDescription="No Notebooks Illustration" />
+
+            <TextView
+                android:id="@+id/tv_empty_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No Notebooks Found"
+                android:textColor="?attr/flownotesTextPrimary"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:id="@+id/tv_empty_subtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Create your first digital notebook or import a PDF to start handwritten notes and active recall."
+                android:textColor="?attr/flownotesTextSecondary"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:lineSpacingExtra="2dp" />
+
+            <Button
+                android:id="@+id/btn_empty_create"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:text="+ Create First Notebook"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:background="@drawable/bg_pill_button"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:layout_marginTop="20dp" />
+        </LinearLayout>
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Floating Action Button: New Notebook -->
+    <!-- Floating Action Button: New Notebook (Elevated Pill / Round FAB) -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_new_notebook"
         android:layout_width="wrap_content"
@@ -224,6 +398,7 @@
         android:contentDescription="@string/create_notebook"
         app:backgroundTint="@color/primary"
         app:tint="@android:color/white"
-        app:srcCompat="@drawable/ic_add" />
+        app:srcCompat="@drawable/ic_add"
+        app:elevation="6dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,13 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#3B82F6</color>
+    <!-- Brand Accents (Zero Neon / Scandinavian Editorial) -->
+    <color name="primary">#2563EB</color>
     <color name="primary_dark">#1D4ED8</color>
     <color name="primary_light">#EFF6FF</color>
-    <color name="accent">#8B5CF6</color>
+    <color name="accent">#7C3AED</color>
+    <color name="accent_dark">#6D28D9</color>
+
+    <!-- Curated Notebook Cover Swatches (Subdued, Anti-AI-Slop) -->
+    <color name="cover_sapphire">#2563EB</color>
+    <color name="cover_slate">#334155</color>
+    <color name="cover_forest">#059669</color>
+    <color name="cover_amber">#D97706</color>
+    <color name="cover_crimson">#DC2626</color>
+    <color name="cover_plum">#7C3AED</color>
+    <color name="cover_ochre">#B45309</color>
+    <color name="cover_charcoal">#1E293B</color>
+
+    <!-- Active Recall Tape Colors -->
+    <color name="tape_yellow">#FEF08A</color>
+    <color name="tape_yellow_border">#CA8A04</color>
+
+    <!-- Light Theme Palette -->
+    <color name="light_surface_base">#F8FAFC</color>
+    <color name="light_surface_card">#FFFFFF</color>
+    <color name="light_surface_elevated">#F1F5F9</color>
+    <color name="light_text_primary">#0F172A</color>
+    <color name="light_text_secondary">#475569</color>
+    <color name="light_border">#E2E8F0</color>
+    <color name="light_dock_bg">#FFFFFF</color>
+
+    <!-- Dark Theme Palette -->
+    <color name="dark_surface_base">#0F172A</color>
+    <color name="dark_surface_card">#1E293B</color>
+    <color name="dark_surface_elevated">#334155</color>
+    <color name="dark_text_primary">#F1F5F9</color>
+    <color name="dark_text_secondary">#94A3B8</color>
+    <color name="dark_border">#334155</color>
+    <color name="dark_dock_bg">#1E293B</color>
+
+    <!-- AMOLED Black Theme Palette -->
+    <color name="amoled_surface_base">#000000</color>
+    <color name="amoled_surface_card">#111111</color>
+    <color name="amoled_surface_elevated">#1A1A1A</color>
+    <color name="amoled_text_primary">#F8FAFC</color>
+    <color name="amoled_text_secondary">#94A3B8</color>
+    <color name="amoled_border">#222222</color>
+    <color name="amoled_dock_bg">#111111</color>
+
+    <!-- UI Component Base Colors -->
     <color name="bg_app">#F8FAFC</color>
     <color name="bg_surface">#FFFFFF</color>
     <color name="border_color">#E2E8F0</color>
-    <color name="text_primary">#1E293B</color>
-    <color name="text_secondary">#64748B</color>
-    <color name="tape_yellow">#FEF08A</color>
+    <color name="text_primary">#0F172A</color>
+    <color name="text_secondary">#475569</color>
 </resources>

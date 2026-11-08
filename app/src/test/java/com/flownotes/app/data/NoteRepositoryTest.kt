@@ -9,12 +9,13 @@ import org.junit.Assert.*
 import org.junit.Before
 import org.junit.Test
 import java.io.File
+import java.nio.charset.StandardCharsets
 import java.util.UUID
 
 /**
- * Unit Test Specification: NoteRepository Local Persistence
+ * Unit Test Specification: NoteRepository Local Persistence & Security Boundary
  * Verifies directory creation, default notebooks initialization, save/load, page addition,
- * deletion, and atomic write handling.
+ * deletion, atomic write handling, and strict path traversal prevention.
  */
 class NoteRepositoryTest {
 
@@ -161,5 +162,183 @@ class NoteRepositoryTest {
         assertTrue("Target file must exist", targetFile.exists())
         assertFalse("Temporary file must NOT be left behind", tempFile.exists())
         assertTrue("Target file should not be empty", targetFile.length() > 0)
+    }
+
+    /**
+     * TEST 8: Path Traversal Prevention on Relative Paths
+     * Verifies that saving a notebook with relative traversal ID ("../../evil")
+     * strictly writes inside notebooksDir and NEVER writes outside.
+     */
+    @Test
+    fun testSaveNotebookPreventsRelativePathTraversal() {
+        val maliciousId = "../../escaped_relative_note"
+        val nb = Notebook(id = maliciousId, title = "Relative Escape Test")
+        repository.saveNotebook(nb)
+
+        val escapedFile = File(testDir, "escaped_relative_note.json")
+        val escapedTmp = File(testDir, "escaped_relative_note.tmp")
+        val rootEscaped = File(testDir.parentFile, "escaped_relative_note.json")
+
+        assertFalse("Must not write escaped .json to parent directory", escapedFile.exists())
+        assertFalse("Must not write escaped .tmp to parent directory", escapedTmp.exists())
+        if (rootEscaped.parentFile?.canRead() == true) {
+            assertFalse("Must not write to ancestor directory", rootEscaped.exists())
+        }
+
+        val containedFile = File(repository.notebooksDir, "escaped_relative_note.json")
+        assertTrue("Sanitized file must exist inside notebooksDir", containedFile.exists())
+
+        // Verify retrieval via traversal ID reads cleanly from notebooksDir
+        val loaded = repository.getNotebook(maliciousId)
+        assertNotNull("Should retrieve notebook saved with traversal ID", loaded)
+        assertEquals("Relative Escape Test", loaded?.title)
+
+        // Verify deletion via traversal ID only deletes the contained file
+        val deleted = repository.deleteNotebook(maliciousId)
+        assertTrue("deleteNotebook should succeed", deleted)
+        assertFalse("Contained file should be deleted", containedFile.exists())
+    }
+
+    /**
+     * TEST 9: Path Traversal Prevention on Absolute Paths
+     * Verifies that saving a notebook with an absolute path ID ("/.../abs_note")
+     * strictly confines file creation to notebooksDir and does not write to the absolute path.
+     */
+    @Test
+    fun testSaveNotebookPreventsAbsolutePathEscape() {
+        val absTargetFile = File(testDir, "abs_escaped_target.json")
+        val absId = absTargetFile.absolutePath.removeSuffix(".json")
+        val nb = Notebook(id = absId, title = "Absolute Escape Test")
+        repository.saveNotebook(nb)
+
+        assertFalse("Must NOT create file directly at arbitrary absolute path", absTargetFile.exists())
+
+        val sanitizedBase = File(absId).name
+        val containedFile = File(repository.notebooksDir, "$sanitizedBase.json")
+        assertTrue("File must be saved strictly within notebooksDir", containedFile.exists())
+
+        // Clean roundtrip retrieval
+        val loaded = repository.getNotebook(absId)
+        assertNotNull("Should retrieve via absolute path query", loaded)
+        assertEquals("Absolute Escape Test", loaded?.title)
+
+        // Clean deletion
+        val deleted = repository.deleteNotebook(absId)
+        assertTrue(deleted)
+        assertFalse(containedFile.exists())
+    }
+
+    /**
+     * TEST 10: Prevention of Arbitrary File Read (Data Exfiltration via getNotebook)
+     * Verifies that getNotebook cannot read canary JSON files outside notebooksDir.
+     */
+    @Test
+    fun testGetNotebookPreventsArbitraryFileReadOutsideNotebooksDir() {
+        // Place a sensitive canary JSON file outside notebooksDir
+        val canaryOutside = File(testDir, "sensitive_config.json")
+        canaryOutside.writeText(
+            "{\"id\": \"sensitive_config\", \"title\": \"TOP_SECRET_CREDENTIALS\", \"pages\": []}",
+            StandardCharsets.UTF_8
+        )
+
+        try {
+            // Attempt relative traversal read
+            val readRel1 = repository.getNotebook("../sensitive_config")
+            assertNull("getNotebook with '../' must not read files outside notebooksDir", readRel1)
+
+            val readRel2 = repository.getNotebook("../../sensitive_config")
+            assertNull("getNotebook with '../../' must not read files outside notebooksDir", readRel2)
+
+            // Attempt absolute path read
+            val readAbs = repository.getNotebook(canaryOutside.absolutePath.removeSuffix(".json"))
+            assertNull("getNotebook with absolute path must not read files outside notebooksDir", readAbs)
+        } finally {
+            canaryOutside.delete()
+        }
+    }
+
+    /**
+     * TEST 11: Prevention of Arbitrary File Deletion (deleteNotebook)
+     * Verifies that deleteNotebook cannot delete canary files outside notebooksDir.
+     */
+    @Test
+    fun testDeleteNotebookPreventsArbitraryFileDeletionOutsideNotebooksDir() {
+        // Place a canary file in parent directory
+        val canaryFile = File(testDir, "critical_system_file.json")
+        canaryFile.writeText("CRITICAL_IMMUTABLE_DATA", StandardCharsets.UTF_8)
+
+        try {
+            // Attempt deletion via relative path traversal
+            repository.deleteNotebook("../critical_system_file")
+            assertTrue("Canary file must NOT be deleted via relative traversal", canaryFile.exists())
+
+            repository.deleteNotebook("../../critical_system_file")
+            assertTrue("Canary file must NOT be deleted via deep traversal", canaryFile.exists())
+
+            // Attempt deletion via absolute path
+            repository.deleteNotebook(canaryFile.absolutePath.removeSuffix(".json"))
+            assertTrue("Canary file must NOT be deleted via absolute path", canaryFile.exists())
+        } finally {
+            canaryFile.delete()
+        }
+    }
+
+    /**
+     * TEST 12: Complex & Obfuscated Traversal Vectors Sanitization
+     * Tests resilience against backslashes, dot combinations, empty IDs, whitespace, and null bytes.
+     */
+    @Test
+    fun testComplexAndObfuscatedTraversalVectorsSanitization() {
+        val adversarialVectors = listOf(
+            "..\\..\\win_traversal",
+            "....//deep_dots",
+            "..",
+            "../..",
+            "",
+            "   ",
+            "note\u0000poison",
+            "sub/dir/nested_id"
+        )
+
+        for (vec in adversarialVectors) {
+            val nb = Notebook(id = vec, title = "Payload: $vec")
+            repository.saveNotebook(nb)
+
+            // Verify all files created remain strictly inside notebooksDir
+            val filesInNotebooks = repository.notebooksDir.listFiles() ?: emptyArray()
+            for (f in filesInNotebooks) {
+                assertEquals(
+                    "Every file must have notebooksDir as parent",
+                    repository.notebooksDir.canonicalFile,
+                    f.canonicalFile.parentFile?.canonicalFile
+                )
+            }
+
+            // Verify no files escaped into testDir directly
+            val filesInTestDir = testDir.listFiles { _, name -> name.endsWith(".json") || name.endsWith(".tmp") } ?: emptyArray()
+            assertEquals("No files may escape into testDir for vector: '$vec'", 0, filesInTestDir.size)
+        }
+    }
+
+    @Test
+    fun testFavoriteNotebookPersistence() {
+        val nb = Notebook(
+            title = "Starred Exam Review",
+            folder = "Study",
+            isFavorite = true
+        )
+        repository.saveNotebook(nb)
+
+        val retrieved = repository.getNotebook(nb.id)
+        assertNotNull(retrieved)
+        assertTrue("Notebook must persist isFavorite flag", retrieved!!.isFavorite)
+
+        // Toggle back to false
+        retrieved.isFavorite = false
+        repository.saveNotebook(retrieved)
+
+        val updated = repository.getNotebook(nb.id)
+        assertNotNull(updated)
+        assertFalse("Notebook must persist updated false isFavorite flag", updated!!.isFavorite)
     }
 }

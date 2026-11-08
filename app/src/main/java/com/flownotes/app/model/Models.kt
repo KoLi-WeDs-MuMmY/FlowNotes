@@ -103,6 +103,7 @@ data class Notebook(
     val pages: MutableList<Page> = mutableListOf(),
     val flashcards: MutableList<Flashcard> = mutableListOf(),
     var pdfPath: String? = null,
+    var isFavorite: Boolean = false,
     var createdAt: Long = System.currentTimeMillis(),
     var updatedAt: Long = System.currentTimeMillis()
 ) : Serializable {

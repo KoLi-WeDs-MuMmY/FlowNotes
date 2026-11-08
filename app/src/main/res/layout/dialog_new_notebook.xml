@@ -1,61 +1,152 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:paddingStart="24dp"
     android:paddingEnd="24dp"
-    android:paddingTop="16dp"
-    android:paddingBottom="16dp">
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp"
+    android:background="@drawable/bg_dialog_floating">
+
+    <!-- Dialog Header -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="New Digital Notebook"
+        android:textColor="?attr/flownotesTextPrimary"
+        android:textSize="19sp"
+        android:textStyle="bold" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Enter notebook title and select your default procedural paper template."
-        android:textColor="@color/text_secondary"
+        android:text="Choose title, cover color, and default procedural paper template."
+        android:textColor="?attr/flownotesTextSecondary"
         android:textSize="13sp"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="16dp" />
 
+    <!-- Title Label -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Notebook Title"
-        android:textColor="@color/text_primary"
-        android:textSize="14sp"
+        android:textColor="?attr/flownotesTextPrimary"
+        android:textSize="13sp"
         android:textStyle="bold"
         android:layout_marginBottom="6dp" />
 
+    <!-- Title Input -->
     <EditText
         android:id="@+id/et_notebook_title"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="46dp"
         android:hint="e.g. Physics Mechanics, Calculus II"
         android:inputType="textCapWords"
         android:maxLines="1"
-        android:textColor="@color/text_primary"
-        android:textSize="15sp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp"
-        android:background="@drawable/bg_folder_chip"
-        android:layout_marginBottom="18dp" />
+        android:textColor="?attr/flownotesTextPrimary"
+        android:textColorHint="?attr/flownotesTextSecondary"
+        android:textSize="14sp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:background="@drawable/bg_filter_chip"
+        android:layout_marginBottom="16dp" />
 
+    <!-- Cover Color Label -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Cover Color"
+        android:textColor="?attr/flownotesTextPrimary"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Curated Color Swatches Row (Anti-AI-Slop Editorial Palette) -->
+    <LinearLayout
+        android:id="@+id/color_swatch_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="18dp">
+
+        <View
+            android:id="@+id/swatch_sapphire"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_sapphire"
+            android:layout_marginEnd="10dp" />
+
+        <View
+            android:id="@+id/swatch_slate"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_slate"
+            android:layout_marginEnd="10dp" />
+
+        <View
+            android:id="@+id/swatch_forest"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_forest"
+            android:layout_marginEnd="10dp" />
+
+        <View
+            android:id="@+id/swatch_amber"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_amber"
+            android:layout_marginEnd="10dp" />
+
+        <View
+            android:id="@+id/swatch_crimson"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_crimson"
+            android:layout_marginEnd="10dp" />
+
+        <View
+            android:id="@+id/swatch_plum"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_plum"
+            android:layout_marginEnd="10dp" />
+
+        <View
+            android:id="@+id/swatch_ochre"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_tool_button"
+            android:backgroundTint="@color/cover_ochre" />
+    </LinearLayout>
+
+    <!-- Paper Template Label -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Default Paper Template"
-        android:textColor="@color/text_primary"
-        android:textSize="14sp"
+        android:textColor="?attr/flownotesTextPrimary"
+        android:textSize="13sp"
         android:textStyle="bold"
         android:layout_marginBottom="6dp" />
 
     <Spinner
         android:id="@+id/sp_paper_template"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/bg_folder_chip"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:layout_height="46dp"
+        android:background="@drawable/bg_filter_chip"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:layout_marginBottom="8dp" />
 
 </LinearLayout>

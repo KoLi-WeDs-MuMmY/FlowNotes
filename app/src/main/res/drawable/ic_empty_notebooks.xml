@@ -1,0 +1,30 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Back notebook shadow/layer -->
+    <path
+        android:fillColor="#3064748B"
+        android:pathData="M35,25 h55 a8,8 0 0,1 8,8 v65 a8,8 0 0,1 -8,8 h-55 a8,8 0 0,1 -8,-8 v-65 a8,8 0 0,1 8,-8 z" />
+    <!-- Front notebook body -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M22,15 h58 a8,8 0 0,1 8,8 v68 a8,8 0 0,1 -8,8 h-58 a8,8 0 0,1 -8,-8 v-68 a8,8 0 0,1 8,-8 z" />
+    <!-- Notebook spine strip -->
+    <path
+        android:fillColor="#1D4ED8"
+        android:pathData="M14,15 h12 v84 h-12 a8,8 0 0,1 -8,-8 v-68 a8,8 0 0,1 8,-8 z" />
+    <!-- Spine crease line -->
+    <path
+        android:fillColor="#40FFFFFF"
+        android:pathData="M25,15 h1.5 v84 h-1.5 z" />
+    <!-- Cover horizontal lines -->
+    <path
+        android:fillColor="#30FFFFFF"
+        android:pathData="M34,35 h42 v3 h-42 z M34,44 h32 v3 h-32 z M34,53 h38 v3 h-38 z" />
+    <!-- Bookmark ribbon -->
+    <path
+        android:fillColor="#FEF08A"
+        android:pathData="M60,15 h10 v22 l-5,-4 l-5,4 z" />
+</vector>

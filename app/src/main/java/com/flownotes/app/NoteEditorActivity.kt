@@ -15,6 +15,7 @@ import com.flownotes.app.data.NoteRepository
 import com.flownotes.app.model.*
 import com.flownotes.app.pdf.PdfAnnotationManager
 import com.flownotes.app.view.CanvasView
+import com.flownotes.app.util.ThemeManager
 import java.io.File
 
 class NoteEditorActivity : AppCompatActivity() {
@@ -29,6 +30,7 @@ class NoteEditorActivity : AppCompatActivity() {
     private var currentPageIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeManager.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_note_editor)
 
@@ -50,6 +52,8 @@ class NoteEditorActivity : AppCompatActivity() {
 
     private fun setupViews() {
         canvasView = findViewById(R.id.canvas_view)
+        canvasView.isDarkMode = ThemeManager.isDarkOrAmoled(this)
+        canvasView.isAmoledMode = ThemeManager.isAmoled(this)
         drawerLayout = findViewById(R.id.drawer_layout)
 
         // Top Toolbar

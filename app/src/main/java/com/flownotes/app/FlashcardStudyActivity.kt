@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.flownotes.app.ai.LocalAiStudyEngine
 import com.flownotes.app.data.NoteRepository
 import com.flownotes.app.model.Flashcard
+import com.flownotes.app.util.ThemeManager
 
 class FlashcardStudyActivity : AppCompatActivity() {
 
@@ -28,6 +29,7 @@ class FlashcardStudyActivity : AppCompatActivity() {
     private lateinit var cardBackLayout: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeManager.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_flashcards)
 

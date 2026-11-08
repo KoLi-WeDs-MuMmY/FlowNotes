@@ -8,26 +8,38 @@ import com.flownotes.app.model.PaperType
 /**
  * Procedural paper background renderer for Android Canvas.
  * Generates Cornell notes layout, 5mm grid, dot grid, ruled lines, and weekly planner.
+ * Supports Light, Dark, and AMOLED (#000000 pure black) backgrounds.
  */
 object PaperTemplateRenderer {
 
-    fun drawPaper(canvas: Canvas, width: Float, height: Float, type: PaperType, isDark: Boolean = false) {
+    fun drawPaper(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        type: PaperType,
+        isDark: Boolean = false,
+        isAmoled: Boolean = false
+    ) {
         when (type) {
-            PaperType.BLANK -> drawBlank(canvas, width, height, isDark)
-            PaperType.RULED -> drawRuled(canvas, width, height, isDark, lineSpacing = 70f, showMargin = true)
-            PaperType.COLLEGE_RULED -> drawRuled(canvas, width, height, isDark, lineSpacing = 52f, showMargin = true)
-            PaperType.GRID -> drawGrid(canvas, width, height, isDark, gridSize = 50f)
-            PaperType.DOTTED -> drawDotted(canvas, width, height, isDark, spacing = 50f)
-            PaperType.CORNELL -> drawCornell(canvas, width, height, isDark)
-            PaperType.PLANNER -> drawPlanner(canvas, width, height, isDark)
-            PaperType.DARK_GRID -> drawGrid(canvas, width, height, isDark = true, gridSize = 55f)
+            PaperType.BLANK -> drawBlank(canvas, width, height, isDark, isAmoled)
+            PaperType.RULED -> drawRuled(canvas, width, height, isDark, isAmoled, lineSpacing = 70f, showMargin = true)
+            PaperType.COLLEGE_RULED -> drawRuled(canvas, width, height, isDark, isAmoled, lineSpacing = 52f, showMargin = true)
+            PaperType.GRID -> drawGrid(canvas, width, height, isDark, isAmoled, gridSize = 50f)
+            PaperType.DOTTED -> drawDotted(canvas, width, height, isDark, isAmoled, spacing = 50f)
+            PaperType.CORNELL -> drawCornell(canvas, width, height, isDark, isAmoled)
+            PaperType.PLANNER -> drawPlanner(canvas, width, height, isDark, isAmoled)
+            PaperType.DARK_GRID -> drawGrid(canvas, width, height, isDark = true, isAmoled = isAmoled, gridSize = 55f)
             PaperType.SEPIA -> drawSepia(canvas, width, height)
         }
     }
 
-    private fun drawBlank(canvas: Canvas, width: Float, height: Float, isDark: Boolean) {
+    private fun drawBlank(canvas: Canvas, width: Float, height: Float, isDark: Boolean, isAmoled: Boolean = false) {
         val bgPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#1A202C") else Color.WHITE
+            color = when {
+                isAmoled -> Color.parseColor("#000000") // 100% OLED pitch black
+                isDark -> Color.parseColor("#1A202C")
+                else -> Color.WHITE
+            }
         }
         canvas.drawRect(0f, 0f, width, height, bgPaint)
     }
@@ -37,13 +49,18 @@ object PaperTemplateRenderer {
         width: Float,
         height: Float,
         isDark: Boolean,
+        isAmoled: Boolean,
         lineSpacing: Float,
         showMargin: Boolean
     ) {
-        drawBlank(canvas, width, height, isDark)
+        drawBlank(canvas, width, height, isDark, isAmoled)
 
         val linePaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#2D3748") else Color.parseColor("#E2E8F0")
+            color = when {
+                isAmoled -> Color.parseColor("#222222")
+                isDark -> Color.parseColor("#2D3748")
+                else -> Color.parseColor("#E2E8F0")
+            }
             strokeWidth = 2f
             style = Paint.Style.STROKE
         }
@@ -56,7 +73,11 @@ object PaperTemplateRenderer {
 
         if (showMargin) {
             val marginPaint = Paint().apply {
-                color = if (isDark) Color.parseColor("#E53E3E") else Color.parseColor("#FCA5A5")
+                color = when {
+                    isAmoled -> Color.parseColor("#991B1B")
+                    isDark -> Color.parseColor("#E53E3E")
+                    else -> Color.parseColor("#FCA5A5")
+                }
                 strokeWidth = 3f
                 style = Paint.Style.STROKE
             }
@@ -64,11 +85,22 @@ object PaperTemplateRenderer {
         }
     }
 
-    private fun drawGrid(canvas: Canvas, width: Float, height: Float, isDark: Boolean, gridSize: Float) {
-        drawBlank(canvas, width, height, isDark)
+    private fun drawGrid(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        isDark: Boolean,
+        isAmoled: Boolean,
+        gridSize: Float
+    ) {
+        drawBlank(canvas, width, height, isDark, isAmoled)
 
         val gridPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#2D3748") else Color.parseColor("#EDF2F7")
+            color = when {
+                isAmoled -> Color.parseColor("#222222") // Hairline contrast for AMOLED
+                isDark -> Color.parseColor("#2D3748")
+                else -> Color.parseColor("#EDF2F7")
+            }
             strokeWidth = 2f
             style = Paint.Style.STROKE
         }
@@ -86,11 +118,22 @@ object PaperTemplateRenderer {
         }
     }
 
-    private fun drawDotted(canvas: Canvas, width: Float, height: Float, isDark: Boolean, spacing: Float) {
-        drawBlank(canvas, width, height, isDark)
+    private fun drawDotted(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        isDark: Boolean,
+        isAmoled: Boolean,
+        spacing: Float
+    ) {
+        drawBlank(canvas, width, height, isDark, isAmoled)
 
         val dotPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#4A5568") else Color.parseColor("#CBD5E1")
+            color = when {
+                isAmoled -> Color.parseColor("#333333")
+                isDark -> Color.parseColor("#4A5568")
+                else -> Color.parseColor("#CBD5E1")
+            }
             style = Paint.Style.FILL
             isAntiAlias = true
         }
@@ -106,17 +149,31 @@ object PaperTemplateRenderer {
         }
     }
 
-    private fun drawCornell(canvas: Canvas, width: Float, height: Float, isDark: Boolean) {
-        drawBlank(canvas, width, height, isDark)
+    private fun drawCornell(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        isDark: Boolean,
+        isAmoled: Boolean
+    ) {
+        drawBlank(canvas, width, height, isDark, isAmoled)
 
         val dividerPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#4A5568") else Color.parseColor("#94A3B8")
+            color = when {
+                isAmoled -> Color.parseColor("#333333")
+                isDark -> Color.parseColor("#4A5568")
+                else -> Color.parseColor("#94A3B8")
+            }
             strokeWidth = 4f
             style = Paint.Style.STROKE
         }
 
         val textPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#718096") else Color.parseColor("#94A3B8")
+            color = when {
+                isAmoled -> Color.parseColor("#64748B")
+                isDark -> Color.parseColor("#718096")
+                else -> Color.parseColor("#94A3B8")
+            }
             textSize = 28f
             isFakeBoldText = true
             isAntiAlias = true
@@ -139,7 +196,11 @@ object PaperTemplateRenderer {
 
         // Ruled lines in Notes Area
         val linePaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#2D3748") else Color.parseColor("#EDF2F7")
+            color = when {
+                isAmoled -> Color.parseColor("#222222")
+                isDark -> Color.parseColor("#2D3748")
+                else -> Color.parseColor("#EDF2F7")
+            }
             strokeWidth = 2f
             style = Paint.Style.STROKE
         }
@@ -158,17 +219,31 @@ object PaperTemplateRenderer {
         }
     }
 
-    private fun drawPlanner(canvas: Canvas, width: Float, height: Float, isDark: Boolean) {
-        drawBlank(canvas, width, height, isDark)
+    private fun drawPlanner(
+        canvas: Canvas,
+        width: Float,
+        height: Float,
+        isDark: Boolean,
+        isAmoled: Boolean
+    ) {
+        drawBlank(canvas, width, height, isDark, isAmoled)
 
         val borderPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#4A5568") else Color.parseColor("#CBD5E1")
+            color = when {
+                isAmoled -> Color.parseColor("#333333")
+                isDark -> Color.parseColor("#4A5568")
+                else -> Color.parseColor("#CBD5E1")
+            }
             strokeWidth = 3f
             style = Paint.Style.STROKE
         }
 
         val titlePaint = Paint().apply {
-            color = if (isDark) Color.WHITE else Color.parseColor("#1E293B")
+            color = when {
+                isAmoled -> Color.WHITE
+                isDark -> Color.WHITE
+                else -> Color.parseColor("#1E293B")
+            }
             textSize = 34f
             isFakeBoldText = true
             isAntiAlias = true
@@ -180,7 +255,11 @@ object PaperTemplateRenderer {
         val rowHeight = (height - 200f) / 3f
 
         val dayPaint = Paint().apply {
-            color = if (isDark) Color.parseColor("#A0AEC0") else Color.parseColor("#64748B")
+            color = when {
+                isAmoled -> Color.parseColor("#94A3B8")
+                isDark -> Color.parseColor("#A0AEC0")
+                else -> Color.parseColor("#64748B")
+            }
             textSize = 24f
             isFakeBoldText = true
             isAntiAlias = true
@@ -202,6 +281,6 @@ object PaperTemplateRenderer {
             color = Color.parseColor("#FDF6E2")
         }
         canvas.drawRect(0f, 0f, width, height, bgPaint)
-        drawRuled(canvas, width, height, isDark = false, lineSpacing = 65f, showMargin = true)
+        drawRuled(canvas, width, height, isDark = false, isAmoled = false, lineSpacing = 65f, showMargin = true)
     }
 }

@@ -2,7 +2,6 @@ package com.flownotes.app.data
 
 import android.content.Context
 import com.flownotes.app.model.*
-import com.flownotes.app.model.Point
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -15,6 +14,9 @@ import java.util.UUID
  * Saves notebooks, pages, strokes, active recall tapes, sticky notes, and flashcards
  * directly to device private storage.
  * Zero server required, zero cloud cost, 100% private and persistent.
+ *
+ * Hardened with multi-layered path traversal sanitization and canonical path containment
+ * to strictly ensure all filesystem operations remain within device-private storage.
  */
 class NoteRepository(val baseDir: File) {
 
@@ -28,6 +30,20 @@ class NoteRepository(val baseDir: File) {
     init {
         ensureDefaultNotebooks()
     }
+
+    /**
+     * Sanitizes a notebook ID to strip directory separators, path traversal sequences ('..'),
+     * null bytes, and whitespace, strictly confining file operations to the notebooks directory.
+     * If an ID becomes empty after sanitization, falls back to a safe default identifier.
+     */
+    fun sanitizeId(id: String): String =
+        File(id).name
+            .replace("..", "")
+            .replace("/", "")
+            .replace("\\", "")
+            .replace("\u0000", "")
+            .trim()
+            .ifEmpty { "default_note" }
 
     fun getAllNotebooks(): List<Notebook> {
         if (!notebooksDir.exists()) notebooksDir.mkdirs()
@@ -47,7 +63,13 @@ class NoteRepository(val baseDir: File) {
     }
 
     fun getNotebook(id: String): Notebook? {
-        val file = File(notebooksDir, "$id.json")
+        val safeId = sanitizeId(id)
+        val file = File(notebooksDir, "$safeId.json")
+
+        // Defense in depth: Verify target stays strictly within notebooksDir
+        if (file.canonicalFile.parentFile?.canonicalFile != notebooksDir.canonicalFile) {
+            return null
+        }
         if (!file.exists()) return null
         return try {
             val jsonStr = file.readText(StandardCharsets.UTF_8)
@@ -60,13 +82,23 @@ class NoteRepository(val baseDir: File) {
     /**
      * Atomically saves notebook using a temporary file rename pattern.
      * Prevents file corruption during unexpected app termination or power loss.
+     * Sanitizes notebook ID to strictly prevent directory traversal attacks.
      */
     fun saveNotebook(notebook: Notebook) {
         notebook.updatedAt = System.currentTimeMillis()
         if (!notebooksDir.exists()) notebooksDir.mkdirs()
 
-        val targetFile = File(notebooksDir, "${notebook.id}.json")
-        val tempFile = File(notebooksDir, "${notebook.id}.tmp")
+        val safeId = sanitizeId(notebook.id)
+        val targetFile = File(notebooksDir, "$safeId.json")
+        val tempFile = File(notebooksDir, "$safeId.tmp")
+
+        // Defense in depth: Verify target and temp stay strictly within notebooksDir
+        val canonicalDir = notebooksDir.canonicalFile
+        if (targetFile.canonicalFile.parentFile?.canonicalFile != canonicalDir ||
+            tempFile.canonicalFile.parentFile?.canonicalFile != canonicalDir) {
+            throw SecurityException("Path traversal detected: file resolution escaped notebooks directory")
+        }
+
         val json = serializeNotebook(notebook)
 
         FileOutputStream(tempFile).use { out ->
@@ -81,7 +113,13 @@ class NoteRepository(val baseDir: File) {
     }
 
     fun deleteNotebook(id: String): Boolean {
-        val file = File(notebooksDir, "$id.json")
+        val safeId = sanitizeId(id)
+        val file = File(notebooksDir, "$safeId.json")
+
+        // Defense in depth: Verify target stays strictly within notebooksDir
+        if (file.canonicalFile.parentFile?.canonicalFile != notebooksDir.canonicalFile) {
+            return false
+        }
         return file.delete()
     }
 
@@ -172,6 +210,7 @@ class NoteRepository(val baseDir: File) {
         root.put("folder", nb.folder)
         root.put("defaultPaperType", nb.defaultPaperType.name)
         root.put("pdfPath", nb.pdfPath ?: JSONObject.NULL)
+        root.put("isFavorite", nb.isFavorite)
         root.put("createdAt", nb.createdAt)
         root.put("updatedAt", nb.updatedAt)
 
@@ -285,6 +324,7 @@ class NoteRepository(val baseDir: File) {
             folder = json.optString("folder", "All Notes"),
             defaultPaperType = runCatching { PaperType.valueOf(json.optString("defaultPaperType", "RULED")) }.getOrDefault(PaperType.RULED),
             pdfPath = if (json.isNull("pdfPath")) null else json.optString("pdfPath"),
+            isFavorite = json.optBoolean("isFavorite", false),
             createdAt = json.optLong("createdAt", System.currentTimeMillis()),
             updatedAt = json.optLong("updatedAt", System.currentTimeMillis())
         )

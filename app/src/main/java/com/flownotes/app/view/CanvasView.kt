@@ -34,6 +34,12 @@ class CanvasView @JvmOverloads constructor(
             invalidate()
         }
 
+    var isAmoledMode: Boolean = false
+        set(value) {
+            field = value
+            invalidate()
+        }
+
     var pdfPageBitmap: Bitmap? = null
         set(value) {
             field = value
@@ -97,7 +103,7 @@ class CanvasView @JvmOverloads constructor(
             val destRect = RectF(0f, 0f, w, h)
             canvas.drawBitmap(pdfPageBitmap!!, null, destRect, null)
         } else {
-            PaperTemplateRenderer.drawPaper(canvas, w, h, currentPage.paperType, isDarkMode)
+            PaperTemplateRenderer.drawPaper(canvas, w, h, currentPage.paperType, isDarkMode, isAmoledMode)
         }
 
         // 2. Draw Committed Strokes
